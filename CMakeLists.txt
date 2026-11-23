@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(GunmansProofSNESRecomp C CXX)
+if(WIN32)
+    enable_language(RC)
+endif()
 
 set(CMAKE_C_STANDARD 11)
 
@@ -44,6 +47,17 @@ add_executable(GunmansProofSNESRecomp
     src/game_rtl.c
     src/gen_stubs.c
 )
+
+# Application icon: embedded in the exe on Windows, and staged beside it for
+# the launcher window (GameInfo.window_icon_path).
+if(WIN32)
+    target_sources(GunmansProofSNESRecomp PRIVATE launcher_assets/icon/app.rc)
+endif()
+add_custom_command(TARGET GunmansProofSNESRecomp POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:GunmansProofSNESRecomp>/assets/img
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_SOURCE_DIR}/launcher_assets/icon/gunmans_proof.png
+            $<TARGET_FILE_DIR:GunmansProofSNESRecomp>/assets/img/icon.png)
 
 # ROM identity. rom_identity.txt is the one place the digests live: the build
 # turns it into snesrecomp_rom_identity.h (SNESRECOMP_ROM_EXPECTED_SHA256 and

@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "snesrecomp_rom_identity.h"  /* generated from rom_identity.txt */
+#include "recomp_launcher.h"          /* RecompLauncherCGameInfo (launcher window icon) */
 
 #ifndef __ANDROID__
 #define SDL_MAIN_HANDLED 1
@@ -244,6 +245,11 @@ static int GunWantTurbo(void)
     return 0;
 }
 
+static void GunConfigureLauncher(RecompLauncherCGameInfo *gi)
+{
+    gi->window_icon_path = "assets/img/icon.png";   /* staged by CMake beside the exe */
+}
+
 static void GunBeginFrame(unsigned n)
 {
     (void)n;
@@ -394,6 +400,7 @@ static const SnesDesktopHostGame kGameHost = {
     .extra_inputs        = GunExtraInputs,
     .want_turbo          = GunWantTurbo,
     .begin_sim_frame     = GunBeginFrame,
+    .configure_launcher  = GunConfigureLauncher,
     .menu_hotkey         = SDLK_INSERT,
     .menu_open           = GunMenu_Open,
     .menu_is_open        = GunMenu_IsOpen,

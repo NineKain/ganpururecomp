@@ -108,7 +108,7 @@ Anything else is refused before it boots.
 | `recomp/`, `rom_identity.txt` | Analysis config and ROM digests |
 | `src/gen/` | Generated C. Never committed |
 | `snesrecomp/`, `recomp-ui/` | Vendored framework and launcher UI (see `patches/`, `framework_pins.txt`) |
-| `launcher_assets/` | Launcher artwork (original cartridge) |
+| `launcher_assets/` | Launcher artwork and app icon (original art: cartridge, sheriff star) |
 | `tools/`, `scripts/` | ROM-to-C pipeline, release packaging |
 
 ## Credits
