@@ -139,8 +139,12 @@ static int GunIsPause(void)
 static int GunIsPlay(void)
 {
     int cam = GunW(0x0A60), lo = GunW(0x0B2A), hi = GunW(0x0B28);
+    /* Screen shake (boss hits, quakes) offsets the BG scroll shadows a few
+     * pixels from the camera, so allow a small difference instead of requiring
+     * an exact match, otherwise the widescreen view drops to 4:3 mid-shake. */
+    int dx = (int16_t)(GunW(0x0120) - cam), dy = (int16_t)(GunW(0x0122) - GunW(0x0A62));
     return g_ram[0x0AFC] == 0 && g_ram[0x016E] <= 1 &&
-           GunW(0x0120) == cam && GunW(0x0122) == GunW(0x0A62) &&
+           dx >= -24 && dx <= 24 && dy >= -24 && dy <= 24 &&
            hi >= lo && hi - lo <= 0x400 && cam >= lo && cam <= hi;
 }
 
