@@ -289,7 +289,7 @@ static void GunBeginFrame(unsigned n)
      * the corner of the widescreen frame instead of floating in the picture. */
     int hud = play && GunMenu_HudCorners();
     PpuSetWidescreenHudSplit(g_ppu, hud ? 40 : 0, 160, 164);
-    PpuSetWidescreenHudAlwaysVisible(g_ppu, hud != 0);
+    PpuSetWidescreenHudAlwaysVisible(g_ppu, false);   /* HUD rides the live world margin: corners of the real picture, never floating in black */
     /* Combat-zone weapon/punch boxes are two big sprites in OAM slots 0-1. */
     PpuSetWsHudOamBand(g_ppu, hud ? 40 : 0, 160, 164);
     PpuSetWsHudOamShiftRange(g_ppu, 0, hud ? 2 : 0);
