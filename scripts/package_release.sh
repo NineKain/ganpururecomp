@@ -43,7 +43,7 @@ PLATFORM="${POS[1]:-${PLATFORM:-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname
 IMPL="snesrecomp/tools/ci/stage_setup_host.sh"
 if [ ! -f "$IMPL" ]; then
   echo "package_release.sh: $IMPL missing — the snesrecomp pin predates setup packs." >&2
-  echo "  Update the submodule: git submodule update --init --recursive" >&2
+  echo "  Re-clone the repository (the framework is vendored)" >&2
   exit 1
 fi
 

@@ -38,7 +38,7 @@ done
 SNESRECOMP_ROOT="${SNESRECOMP_ROOT:-snesrecomp}"
 CLI="$SNESRECOMP_ROOT/snesrecomp_cli.py"
 if [ ! -f "$CLI" ]; then
-  echo "regen.sh: $CLI missing — run: git submodule update --init --recursive" >&2
+  echo "regen.sh: $CLI missing — re-clone the repository" >&2
   exit 1
 fi
 

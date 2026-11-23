@@ -24,8 +24,8 @@ set(SNESRECOMP_ROOT "${CMAKE_SOURCE_DIR}/snesrecomp" CACHE PATH
     "Path to the snesrecomp checkout used by this game")
 if(NOT EXISTS "${SNESRECOMP_ROOT}/runner/runner.cmake")
     message(FATAL_ERROR
-        "snesrecomp submodule missing at ${SNESRECOMP_ROOT}.\n"
-        "Run: git submodule update --init --recursive")
+        "snesrecomp folder missing at ${SNESRECOMP_ROOT}.\n"
+        "Re-clone the repository.")
 endif()
 # Mod packages are part of every project, not an option. The launcher's Mods
 # page, the .snesmod loader, the trusted-plugin registry and netplay's mod-set
@@ -39,6 +39,7 @@ include(${SNESRECOMP_ROOT}/runner/runner.cmake)
 add_executable(GunmansProofSNESRecomp
     ${SNESRECOMP_RUNNER_SOURCES}
     src/main.c
+    src/gun_menu.c
     src/host_contract.c
     src/game_rtl.c
     src/gen_stubs.c
@@ -112,14 +113,15 @@ set(RECOMP_UI_ROOT "${CMAKE_SOURCE_DIR}/recomp-ui" CACHE PATH
 if(NOT EXISTS "${RECOMP_UI_ROOT}/recomp_ui.cmake")
     message(FATAL_ERROR
         "recomp-ui missing at ${RECOMP_UI_ROOT}.\n"
-        "Run: git submodule update --init --recursive recomp-ui")
+        "Re-clone the repository.")
 endif()
 include(${RECOMP_UI_ROOT}/recomp_ui.cmake)
 # BOXART stages launcher_assets/img/boxart.tga beside the exe; the launcher
 # shows assets/img/boxart.tga by default. EXISTS-guarded in recomp_ui.cmake,
 # so this configures cleanly before any art is fetched.
 recomp_target_launcher_ui(GunmansProofSNESRecomp CONSOLE snes
-    BOXART "${CMAKE_SOURCE_DIR}/launcher_assets/img/boxart.tga")
+    BOXART "${CMAKE_SOURCE_DIR}/launcher_assets/img/boxart.tga"
+    BRAND "${CMAKE_SOURCE_DIR}/launcher_assets/img/brand_game.tga")
 
 # Generate & rebuild from inside the launcher: pick ROM -> recompile locally
 # -> cmake --build -> relaunch. The implementation is the framework's; this

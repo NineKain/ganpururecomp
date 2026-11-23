@@ -1,22 +1,30 @@
-# Gunmans Proof Recomp
+# Gunman's Proof Recomp
 
-A native recompilation of **Gunmans Proof** (JPN), built on
-[snesrecomp](https://github.com/RetroPortingToolKit/snesrecomp).
-
-_Add a short description here._
-
-
+A native PC recompilation of **Gunman's Proof** (SNES), built on
+[snesrecomp](https://github.com/RetroPortingToolKit/snesrecomp), with true
+widescreen, 60 fps and a pixel-art in-game settings menu.
 
 > **You must legally own a copy of the game.** No ROM data is distributed with
 > this project, in the repository or in any release. The recompiled C is
 > generated locally from your own copy and is never committed.
 
+## Features
+
+- **True widescreen** (16:9 / 16:10 / 21:9 / custom): the world is drawn into
+  the margins instead of stretching the 4:3 picture. Gameplay, NPC dialogue
+  and the pause screen are widescreen; the map, cutscenes, title and menus stay
+  at the authentic 4:3. The character stays centred; the view never slides.
+- Score / life HUD can sit in the screen corners (HUD IN CORNERS).
+- Faster **text speed** (x1 / x2 / x3 / instant) and **faster room fades**.
+- Skip intro with Start, rewind (F12), fast-forward (Tab), save states.
+- DualSense / gamepad support, rebindable keys.
+- **Insert** opens a pixel-art settings menu in-game.
+
 ## Status
 
-Scaffolded on 2026-11-17 — **not yet a working port.** The layout, build,
-regeneration pipeline, CI, and packaging are wired up; the game does not run
-until the host work in `src/game_rtl.c` is done. See
-[Porting from here](#porting-from-here).
+Playable. Tested on Linux; the Windows build is cross-compiled and has had
+less testing. Untested: long playthroughs, the name-entry screen, and audio during the
+fast-forwarded room fades (it speeds up; harmless).
 
 ## ROM identity
 
@@ -38,7 +46,6 @@ revision fails immediately instead of producing subtly wrong output.
 ## Build
 
 ```sh
-git submodule update --init --recursive
 bash tools/regen.sh --rom /path/to/72f6229a-Gunmans_Proof_English_v1.03.sfc
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
@@ -78,34 +85,22 @@ than mis-executing ten frames in.
 | `rom_identity.txt` | ROM digests — read by the build, `tools/regen.sh` and CI |
 | `src/` | Host code you own: `main.c`, `game_rtl.c` |
 | `src/gen/` | Generated C. Never committed — regenerate locally |
-| `snesrecomp/` | Framework submodule (owns `lib/recomp-net`, `lib/retcomm-rbengine`) |
+| `snesrecomp/` | Framework, vendored with local changes (see `patches/`, `framework_pins.txt`) |
+| `recomp-ui/` | Launcher UI, vendored with the Gunman theme (see `patches/`) |
+| `launcher_assets/` | Launcher artwork (original pixel cartridge) |
+| `patches/` | Diffs of the local changes against the pinned upstream commits |
 | `tools/` | `regen.sh` — the ROM → C pipeline |
 | `scripts/` | `package_release.sh` — player-facing zip |
 | `framework_pins.txt` | Exact framework commits this project was scaffolded against |
 
-## Porting from here
-
-The scaffold stops where the game-specific work starts. In rough order:
-
-1. **Make it boot.** `src/game_rtl.c` holds the frame driver. It starts on
-   the framework's beam-aligned driver (`snesrecomp/runner/src/beam_frame_driver.h`):
-   one frame per PPU field, interrupts taken where the beam latches them,
-   the field rasterized from the raster journal. A title whose main loop it
-   does not fit replaces those calls with its own driver.
-2. **Name things.** Add entries to `recomp/symbols.toml` as you identify
-   routines, then re-run `tools/regen.sh`. Set `emit = true` to promote one
-   into ahead-of-time analysis; leave it false to keep it interpreted.
-   Regen synchronizes the marked blocks in each bank cfg, creating missing
-   configs. Only proven variants become AOT code. See `recomp/README.md`.
-3. **Resolve dispatch misses.** After every run, deal with unresolved
-   indirect targets before anything else — they are the reason a port
-   diverges, and they are cheap to fix early.
-4. **Never synthesise a result** to get past uncovered code, and never edit
-   `src/gen/` by hand. Fix the config or the framework and regenerate.
-
 ## Multiplayer
 
 Single player.
+
+## Credits
+
+Built on [snesrecomp](https://github.com/RetroPortingToolKit/snesrecomp) and
+[recomp-ui](https://github.com/mstan/recomp-ui) (vendored, with their own licenses).
 
 ## License
 

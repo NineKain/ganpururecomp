@@ -1,3 +1,6 @@
+# Upstream commits the vendored framework folders were copied from.
+# The folders are plain directories in this repo (not submodules); the
+# local changes made on top are in patches/ for reference / re-basing.
 snesrecomp=80a41241e39bfffd384506fbe7ca65b386e03050
 recomp-ui=d55bf8304c455dbc5773a000c919f6ba0a26d6bb
 recomp-net=7a4d330ecf995b881d167234da3c0b01675fd512
