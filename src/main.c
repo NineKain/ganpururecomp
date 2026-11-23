@@ -299,8 +299,12 @@ static void GunBeginFrame(unsigned n)
      * not whatever the tilemap wraps around to. */
     if (!ws) {
         PpuSetWidescreenLayerClamp(g_ppu, 0x0F); PpuSetWidescreenLayerMirror(g_ppu, 0x00);
-        if (g_ppu->renderBuffer) memset(g_ppu->renderBuffer, 0, (size_t)g_ppu->renderPitch * 224);
     }
+    /* The side columns that the current room is too small to fill are never
+     * redrawn, so they keep pixels from when the margin was wider (the camera
+     * walking back to a room edge) and show up as striped garbage. Wipe the
+     * buffer every frame; everything that is visible is redrawn anyway. */
+    if (g_ppu->renderBuffer) memset(g_ppu->renderBuffer, 0, (size_t)g_ppu->renderPitch * 224);
     if (GunMenu_WideActors()) { g_wsL = g_ppu->extraLeftCur; g_wsR = g_ppu->extraRightCur; }
     else g_wsL = g_wsR = -16;   /* original window [-32,255] */
 }
