@@ -75,7 +75,7 @@ Requirements: CMake, a C/C++ compiler, SDL3 build dependencies, and a Rust
 toolchain (used once to build the analyzer).
 
 ```sh
-git clone <this repo> && cd <this repo>
+git clone https://github.com/NineKain/ganpururecomp.git && cd ganpururecomp
 bash tools/regen.sh --rom /path/to/your/Gunmans_Proof.sfc
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
