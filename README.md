@@ -118,6 +118,8 @@ Built on [snesrecomp](https://github.com/RetroPortingToolKit/snesrecomp) and
 
 ## License
 
-This project's own source is under the license in `LICENSE` (GPL-3.0). The framework carries
-its own terms (`snesrecomp/LICENSE`, `snesrecomp/THIRD_PARTY_ATTRIBUTION.md`).
-Neither covers the game data, which is not distributed here.
+This project's own source is GPL-3.0 (`LICENSE`). The vendored `snesrecomp/`
+framework is under the **PolyForm Noncommercial License 1.0.0**
+(`snesrecomp/LICENSE`, `snesrecomp/THIRD_PARTY_ATTRIBUTION.md`), so builds that
+include it are for non-commercial use. `recomp-ui/` has its own `LICENSE`.
+The game data is not covered and is not distributed here.
