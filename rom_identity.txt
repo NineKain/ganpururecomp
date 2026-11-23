@@ -1,0 +1,26 @@
+# ROM identity for Gunmans Proof — the single source of truth.
+#
+# Read by three consumers, so a revision change is made once, here:
+#   - the build   (CMake generates snesrecomp_rom_identity.h from this file)
+#   - tools/regen.sh
+#   - .github/workflows/release.yml
+#
+# Format is `key = value`, one per line; `#` starts a comment. Values may be
+# quoted. Leaving a digest empty means the build cannot verify a ROM it is
+# handed — it will say so rather than accept it.
+
+display_name    = Gunmans Proof
+rom_file        = 72f6229a-Gunmans_Proof_English_v1.03.sfc
+# Every digest of the bare image (copier header stripped), so the Retro
+# catalog can take a submission's identity from this file rather than ask
+# the submitter to hash the ROM again. The build verifies on crc32/sha256.
+expected_crc32  = acdee757
+expected_md5    = ecdf9d31446ba7c1827c96949514a144
+expected_sha1   = 9ef80a3aa84ff09efbbb36312b4b47813d6688f4
+expected_sha256 = b18e09347f056c572f7e0e220ca204a642246d0d9825b2c817f3edf30c22ed8c
+rom_size        = 3145728
+mapping         = lorom
+region          = JPN
+# What a mod package's [[target]] game_id must name to apply to this title
+# (snesrecomp/docs/MOD_PACKAGES.md). Stable across revisions on purpose.
+game_id         = gunmansproof-jpn
