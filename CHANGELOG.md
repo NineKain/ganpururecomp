@@ -12,6 +12,9 @@ First release.
 - DualSense / gamepad support, pixel-art settings menu (Insert), Gunman's Proof
   styled launcher with an original cartridge art and app icon.
 
+- Fixes: "4:3 ORIGINAL" is now remembered after a restart; SIDE EDGES = BLACK
+  shows only the plain 4:3 picture (no HUD or sprites in the side bars).
+
 Known limits: Windows build is cross-compiled and lightly tested; projectile and
 effect sprites can pop at the original screen edge; rooms wider than 512 px and
 the first boss have not been checked; audio speeds up during fast room fades.

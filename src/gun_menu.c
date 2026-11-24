@@ -96,6 +96,9 @@ static void AspectLoad(void) {
     else if (!strcmp(k, "fps")) g_fps = v != 0;
   }
   fclose(f);
+  /* A saved "4:3 ORIGINAL" choice must survive a restart: the host's own
+   * widescreen flag comes from config.ini and would otherwise override it. */
+  snesrecomp_desktop_set_widescreen(g_aspect != kGunAspect_4x3);
   snes_osd_set_fps_visible(g_fps);
 }
 
@@ -115,12 +118,13 @@ int GunMenu_RoomFades(void) { if (!g_aspect_loaded) AspectLoad(); return g_fades
 int GunMenu_TextSpeed(void) { if (!g_aspect_loaded) AspectLoad(); return g_textspeed; }
 int GunMenu_SkipIntro(void) { if (!g_aspect_loaded) AspectLoad(); return g_skipintro; }
 int GunMenu_HudCorners(void) { if (!g_aspect_loaded) AspectLoad(); return g_hud; }
+int GunMenu_BlackEdges(void) { if (!g_aspect_loaded) AspectLoad(); return g_edges == 2; }
 int GunMenu_ViewSlide(void)  { return 0; } /* off: the 4:3 picture stays centred, character stays where the game puts him */
 
 int GunMenu_AspectMode(void) {
   if (!g_aspect_loaded) AspectLoad();
-  if (!g_config.widescreen) return kGunAspect_4x3;
-  return g_aspect == kGunAspect_4x3 ? kGunAspect_Auto : g_aspect;
+  if (g_aspect == kGunAspect_4x3 || !g_config.widescreen) return kGunAspect_4x3;
+  return g_aspect;
 }
 
 double GunMenu_FixedAspect(void) {

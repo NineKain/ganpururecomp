@@ -16,6 +16,7 @@ const uint32_t *GunMenu_Panel(int *w, int *h);
 /* Aspect ratio setting, shared with the presenter in main.c. */
 enum { kGunAspect_Auto, kGunAspect_4x3, kGunAspect_16x9, kGunAspect_16x10,
        kGunAspect_21x9, kGunAspect_Count };
+int    GunMenu_BlackEdges(void);      /* SIDE EDGES = BLACK: original 4:3 picture only */
 void   GunMenu_ApplyEdges(void);      /* per-frame widescreen margin policy */
 int    GunMenu_AspectMode(void);      /* effective mode (4x3 when widescreen is off) */
 double GunMenu_FixedAspect(void);     /* displayed w/h of a fixed mode; 0 for Auto */

@@ -284,6 +284,7 @@ static void GunBeginFrame(unsigned n)
         l = cam - lo - 2; r = hi - cam - 2;
         if (l < 0) l = 0;
         if (r < 0) r = 0;
+        if (GunMenu_BlackEdges()) l = r = 0;   /* BLACK: the plain 4:3 picture, nothing in the sides */
     }
     /* NPC dialogue needs no special case: the box is part of the centred 4:3
      * picture and the dim window only covers it, so the widescreen world simply
@@ -291,7 +292,7 @@ static void GunBeginFrame(unsigned n)
      * the renderer, fixed in beam_frame_driver.c.) */
     /* The status HUD (BG3, top 40 lines, all in the left 160px) is pinned to
      * the corner of the widescreen frame instead of floating in the picture. */
-    int hud = play && GunMenu_HudCorners();
+    int hud = play && GunMenu_HudCorners() && !GunMenu_BlackEdges();
     PpuSetWidescreenHudSplit(g_ppu, hud ? 40 : 0, 160, 164);
     PpuSetWidescreenHudAlwaysVisible(g_ppu, false);   /* HUD rides the live world margin: corners of the real picture, never floating in black */
     /* Combat-zone weapon/punch boxes are two big sprites in OAM slots 0-1. */
@@ -309,7 +310,7 @@ static void GunBeginFrame(unsigned n)
      * walking back to a room edge) and show up as striped garbage. Wipe the
      * buffer every frame; everything that is visible is redrawn anyway. */
     if (g_ppu->renderBuffer) memset(g_ppu->renderBuffer, 0, (size_t)g_ppu->renderPitch * 224);
-    if (GunMenu_WideActors()) { g_wsL = g_ppu->extraLeftCur; g_wsR = g_ppu->extraRightCur; }
+    if (GunMenu_WideActors() && !GunMenu_BlackEdges()) { g_wsL = g_ppu->extraLeftCur; g_wsR = g_ppu->extraRightCur; }
     else g_wsL = g_wsR = -16;   /* original window [-32,255] */
 }
 static int GunWindowBaseWidth(int frame_w)  { (void)frame_w; return GunMenu_WindowBaseWidth(); }
