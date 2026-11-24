@@ -637,10 +637,10 @@ static void Slider(int y, int pct, int sel) {
 }
 
 static void Footer(const char *help) {
-  Fill(7, 176, 242, 1, C_MID);
-  TextC(182, help, C_GOLD);
-  TextC(196, "UP/DOWN MOVE  LEFT/RIGHT SET", C_DIM);
-  TextC(205, "A/CROSS OK  B/CIRCLE BACK", C_DIM);
+  Fill(7, 174, 242, 1, C_MID);
+  TextC(178, help, C_GOLD);
+  TextC(189, "UP/DOWN MOVE  LEFT/RIGHT SET", C_DIM);
+  TextC(199, "A/CROSS OK  B/CIRCLE BACK", C_DIM);
 }
 
 static void Toggle(int y, int on, int sel) {
@@ -649,7 +649,7 @@ static void Toggle(int y, int on, int sel) {
 
 static void DrawMain(void) {
   TextC(14, "SETTINGS", C_GOLD);
-  int y = 36, st = 16, s = M.sel[SCR_MAIN];
+  int y = 33, st = 13, s = M.sel[SCR_MAIN];
   Row(0, y, "VIDEO", C_LIGHT);  TextR(240, y, ">>", C_BLUE); y += st;
   Row(1, y, "WIDESCREEN", C_LIGHT); TextR(240, y, ">>", C_BLUE); y += st;
   Row(2, y, "VOLUME", C_LIGHT);
@@ -709,7 +709,7 @@ static void DrawWide(void) {
   Toggle(y, g_hud, s == 3); y += st;
   Row(4, y, "BACK", C_LIGHT);
   static const char *const help[5] = {
-    "4:3 IS THE ORIGINAL PICTURE", "EXTEND = REAL ROOM, BLACK = 4:3 CORE",
+    "4:3 IS THE ORIGINAL PICTURE", "EXTEND: ROOM  BLACK: PLAIN 4:3",
     "SHOW ACTORS IN THE MARGINS",
     "HUD AT THE SCREEN CORNERS", ""
   };
@@ -723,9 +723,9 @@ static void DrawControls(void) {
   Row(1, 58, "CONTROLLER", C_LIGHT);
   TextR(240, 58, ">>", C_BLUE);
   Row(2, 76, "BACK", C_LIGHT);
-  Fill(7, 176, 242, 1, C_MID);
-  TextC(184, "PLAYER 1 BUTTON MAPPING", C_DIM);
-  TextC(196, "INSERT OR PS BUTTON CLOSES", C_DIM);
+  Fill(7, 174, 242, 1, C_MID);
+  TextC(182, "PLAYER 1 BUTTON MAPPING", C_DIM);
+  TextC(194, "INSERT OR PS BUTTON CLOSES", C_DIM);
 }
 
 static void DrawBinds(int keys) {
