@@ -8,6 +8,7 @@ First release.
   pause screen. Unused side space stays black; the character stays centred.
 - HUD follows the edges of the widescreen picture; widescreen survives screen shake.
 - Text speed (x1 / x2 / x3 / instant) and faster room fades.
+- PAD FEEDBACK: very light controller rumble when firing and when losing a heart.
 - Skip intro with Start, save states, rewind, fast-forward.
 - DualSense / gamepad support, pixel-art settings menu (Insert), Gunman's Proof
   styled launcher with an original cartridge art and app icon.

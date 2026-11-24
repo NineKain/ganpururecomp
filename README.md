@@ -19,7 +19,9 @@ widescreen, 60 fps, gamepad support and a pixel-art in-game settings menu.
 - **Room fades**: normal, fast (default) or faster.
 - **Skip intro**: press Start during the opening story.
 - Save states, rewind, fast-forward.
-- DualSense, Xbox and other gamepads (SDL3), remappable controls.
+- DualSense, Xbox and other gamepads (SDL3), remappable controls, and very
+  light rumble (a faint tick when the gun fires, a short thump when you lose a
+  heart; PAD FEEDBACK in the menu turns it off).
 - Press **Insert** in-game for the settings menu.
 
 Nothing in the ROM is modified. Text speed, fades and skip-intro run the game's
@@ -64,6 +66,7 @@ hotkeys can be edited in `config.ini`.
 | SKIP INTRO | Start skips the opening story (on by default) |
 | TEXT SPEED | NORMAL / X2 / X3 / INSTANT |
 | ROOM FADES | NORMAL / FAST / FASTER |
+| PAD FEEDBACK | OFF / SUBTLE (controller rumble) |
 
 Known limits: projectile and effect sprites can still pop at the original
 screen edge, rooms wider than 512 px are untested, and audio speeds up during

@@ -56,6 +56,7 @@ static int g_aspect_loaded;
 static int g_edges = 0;        /* 0 extend, 1 mirror, 2 black */
 static int g_actors = 1;       /* draw actors in the widescreen margins */
 static int g_textspeed = 0;   /* 0 normal, 1 x2, 2 x3, 3 instant */
+static int g_rumble = 1;      /* DualSense/pad feedback: 0 off, 1 subtle */
 static int g_fades = 1;       /* room transitions: 0 normal, 1 fast, 2 faster */
 static int g_skipintro = 1;    /* Start skips the opening cutscene */
 static int g_hud = 1;          /* pin the HUD to the frame corner */
@@ -91,6 +92,7 @@ static void AspectLoad(void) {
     else if (!strcmp(k, "slide")) g_slide = v != 0;
     else if (!strcmp(k, "hud")) g_hud = v != 0;
     else if (!strcmp(k, "skipintro")) g_skipintro = v != 0;
+    else if (!strcmp(k, "rumble")) g_rumble = v != 0;
     else if (!strcmp(k, "fades")) g_fades = v < 0 ? 0 : v > 2 ? 2 : v;
     else if (!strcmp(k, "textspeed")) g_textspeed = v < 0 ? 0 : v > 3 ? 3 : v;
     else if (!strcmp(k, "fps")) g_fps = v != 0;
@@ -108,12 +110,13 @@ static void AspectSave(void) {
   if (!path[0]) return;
   FILE *f = fopen(path, "w");
   if (!f) return;
-  fprintf(f, "aspect=%d\nedges=%d\nactors=%d\nslide=%d\nhud=%d\nskipintro=%d\nfps=%d\ntextspeed=%d\nfades=%d\n",
-          g_aspect, g_edges, g_actors, g_slide, g_hud, g_skipintro, g_fps, g_textspeed, g_fades);
+  fprintf(f, "aspect=%d\nedges=%d\nactors=%d\nslide=%d\nhud=%d\nskipintro=%d\nfps=%d\ntextspeed=%d\nfades=%d\nrumble=%d\n",
+          g_aspect, g_edges, g_actors, g_slide, g_hud, g_skipintro, g_fps, g_textspeed, g_fades, g_rumble);
   fclose(f);
 }
 
 int GunMenu_WideActors(void) { if (!g_aspect_loaded) AspectLoad(); return g_actors; }
+int GunMenu_PadFeedback(void) { if (!g_aspect_loaded) AspectLoad(); return g_rumble; }
 int GunMenu_RoomFades(void) { if (!g_aspect_loaded) AspectLoad(); return g_fades; }
 int GunMenu_TextSpeed(void) { if (!g_aspect_loaded) AspectLoad(); return g_textspeed; }
 int GunMenu_SkipIntro(void) { if (!g_aspect_loaded) AspectLoad(); return g_skipintro; }
@@ -333,7 +336,7 @@ static struct {
 
 static int RowCount(void) {
   switch (M.scr) {
-  case SCR_MAIN: return 9;
+  case SCR_MAIN: return 10;
   case SCR_VIDEO: return 8;
   case SCR_WIDE: return 5;
   case SCR_CONTROLS: return 3;
@@ -375,6 +378,7 @@ static void Adjust(int d) {
     else if (r == 4) { g_skipintro = !g_skipintro; AspectSave(); }
     else if (r == 5) { g_textspeed = Clampi(g_textspeed + (d < 0 ? -1 : 1), 0, 3); AspectSave(); }
     else if (r == 6) { g_fades = Clampi(g_fades + (d < 0 ? -1 : 1), 0, 2); AspectSave(); }
+    else if (r == 7) { g_rumble = !g_rumble; AspectSave(); }
     break;
   case SCR_VIDEO:
     switch (r) {
@@ -421,8 +425,9 @@ static void Activate(void) {
     else if (r == 4) { Adjust(1); }
     else if (r == 5) { g_textspeed = (g_textspeed + 1) % 4; AspectSave(); }
     else if (r == 6) { g_fades = (g_fades + 1) % 3; AspectSave(); }
-    else if (r == 7) { Close(); }
-    else if (r == 8) {
+    else if (r == 7) { g_rumble = !g_rumble; AspectSave(); }
+    else if (r == 8) { Close(); }
+    else if (r == 9) {
       if (M.quit_armed) snesrecomp_request_exit();
       M.quit_armed = !M.quit_armed;
     }
@@ -656,8 +661,10 @@ static void DrawMain(void) {
   { static const char *const n[4] = { "NORMAL", "X2", "X3", "INSTANT" }; Choice(y, n[g_textspeed], s == 5, g_textspeed ? C_GREEN : C_MID); } y += st;
   Row(6, y, "ROOM FADES", C_LIGHT);
   { static const char *const n[3] = { "NORMAL", "FAST", "FASTER" }; Choice(y, n[g_fades], s == 6, g_fades ? C_GREEN : C_MID); } y += st;
-  Row(7, y, "RESUME", C_LIGHT); y += st;
-  Row(8, y, M.quit_armed ? "SURE? PRESS AGAIN" : "QUIT GAME", M.quit_armed ? C_RED : C_LIGHT);
+  Row(7, y, "PAD FEEDBACK", C_LIGHT);
+  Choice(y, g_rumble ? "SUBTLE" : "OFF", s == 7, g_rumble ? C_GREEN : C_MID); y += st;
+  Row(8, y, "RESUME", C_LIGHT); y += st;
+  Row(9, y, M.quit_armed ? "SURE? PRESS AGAIN" : "QUIT GAME", M.quit_armed ? C_RED : C_LIGHT);
   Footer("INSERT OR PS BUTTON CLOSES");
 }
 

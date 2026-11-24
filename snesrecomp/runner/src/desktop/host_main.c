@@ -476,6 +476,14 @@ extern Snes *g_snes;
 /* NULL means the default "config.ini" (cwd is anchored to the exe directory). */
 const char *snesrecomp_desktop_config_path(void) { return g_active_config_file ? g_active_config_file : "config.ini"; }
 
+/* Short rumble pulse on player 1's pad (0..65535 per motor). No-op without a
+ * mapped game controller or when the pad has no rumble motors. */
+void snesrecomp_desktop_rumble(unsigned low, unsigned high, unsigned ms) {
+  if (g_gamepad[0].joystick_id == -1 || g_gamepad[0].raw_joystick) return;
+  SDL_GameController *c = SDL_GameControllerFromInstanceID(g_gamepad[0].joystick_id);
+  if (c) SDL_GameControllerRumble(c, (Uint16)low, (Uint16)high, ms);
+}
+
 void snesrecomp_desktop_set_widescreen(int enabled) {
   g_config.widescreen = enabled != 0;
   WriteConfigFile(g_active_config_file);
