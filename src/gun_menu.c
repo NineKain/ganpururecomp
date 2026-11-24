@@ -57,6 +57,7 @@ static int g_edges = 0;        /* 0 extend, 1 mirror, 2 black */
 static int g_actors = 1;       /* draw actors in the widescreen margins */
 static int g_textspeed = 0;   /* 0 normal, 1 x2, 2 x3, 3 instant */
 static int g_rumble = 1;      /* DualSense/pad feedback: 0 off, 1 subtle */
+static int g_glow = 0;        /* soft glow on bright spots: 0 off, 1 soft, 2 strong */
 static int g_fades = 1;       /* room transitions: 0 normal, 1 fast, 2 faster */
 static int g_skipintro = 1;    /* Start skips the opening cutscene */
 static int g_hud = 1;          /* pin the HUD to the frame corner */
@@ -93,6 +94,7 @@ static void AspectLoad(void) {
     else if (!strcmp(k, "hud")) g_hud = v != 0;
     else if (!strcmp(k, "skipintro")) g_skipintro = v != 0;
     else if (!strcmp(k, "rumble")) g_rumble = v != 0;
+    else if (!strcmp(k, "glow")) g_glow = v < 0 ? 0 : v > 2 ? 2 : v;
     else if (!strcmp(k, "fades")) g_fades = v < 0 ? 0 : v > 2 ? 2 : v;
     else if (!strcmp(k, "textspeed")) g_textspeed = v < 0 ? 0 : v > 3 ? 3 : v;
     else if (!strcmp(k, "fps")) g_fps = v != 0;
@@ -110,13 +112,14 @@ static void AspectSave(void) {
   if (!path[0]) return;
   FILE *f = fopen(path, "w");
   if (!f) return;
-  fprintf(f, "aspect=%d\nedges=%d\nactors=%d\nslide=%d\nhud=%d\nskipintro=%d\nfps=%d\ntextspeed=%d\nfades=%d\nrumble=%d\n",
-          g_aspect, g_edges, g_actors, g_slide, g_hud, g_skipintro, g_fps, g_textspeed, g_fades, g_rumble);
+  fprintf(f, "aspect=%d\nedges=%d\nactors=%d\nslide=%d\nhud=%d\nskipintro=%d\nfps=%d\ntextspeed=%d\nfades=%d\nrumble=%d\nglow=%d\n",
+          g_aspect, g_edges, g_actors, g_slide, g_hud, g_skipintro, g_fps, g_textspeed, g_fades, g_rumble, g_glow);
   fclose(f);
 }
 
 int GunMenu_WideActors(void) { if (!g_aspect_loaded) AspectLoad(); return g_actors; }
 int GunMenu_PadFeedback(void) { if (!g_aspect_loaded) AspectLoad(); return g_rumble; }
+int GunMenu_Glow(void) { if (!g_aspect_loaded) AspectLoad(); return g_glow; }
 int GunMenu_RoomFades(void) { if (!g_aspect_loaded) AspectLoad(); return g_fades; }
 int GunMenu_TextSpeed(void) { if (!g_aspect_loaded) AspectLoad(); return g_textspeed; }
 int GunMenu_SkipIntro(void) { if (!g_aspect_loaded) AspectLoad(); return g_skipintro; }
@@ -337,7 +340,7 @@ static struct {
 static int RowCount(void) {
   switch (M.scr) {
   case SCR_MAIN: return 10;
-  case SCR_VIDEO: return 8;
+  case SCR_VIDEO: return 9;
   case SCR_WIDE: return 5;
   case SCR_CONTROLS: return 3;
   default: return NB + 2;   /* buttons, reset, back */
@@ -389,6 +392,7 @@ static void Adjust(int d) {
     case 4: snesrecomp_set_frame_blend(!snesrecomp_get_frame_blend()); break;
     case 5: snesrecomp_set_no_sprite_limits(!snesrecomp_get_no_sprite_limits()); break;
     case 6: g_fps = !g_fps; snes_osd_set_fps_visible(g_fps); AspectSave(); break;
+    case 7: g_glow = Clampi(g_glow + (d < 0 ? -1 : 1), 0, 2); AspectSave(); break;
     default: break;
     }
     break;
@@ -433,7 +437,7 @@ static void Activate(void) {
     }
     break;
   case SCR_VIDEO:
-    if (r == 7) Back(); else Adjust(1);
+    if (r == 8) Back(); else Adjust(1);
     break;
   case SCR_WIDE:
     if (r == 4) Back(); else Adjust(1);
@@ -671,7 +675,7 @@ static void DrawMain(void) {
 static void DrawVideo(void) {
   TextC(14, "VIDEO", C_GOLD);
   char b[48];
-  int y = 36, st = 15, s = M.sel[SCR_VIDEO];
+  int y = 34, st = 14, s = M.sel[SCR_VIDEO];
   Row(0, y, "DISPLAY", C_LIGHT);
   Choice(y, snesrecomp_get_fullscreen() ? "FULLSCREEN" : "WINDOWED", s == 0, C_BLUE); y += st;
   int sc = snesrecomp_get_window_scale();
@@ -688,10 +692,12 @@ static void DrawVideo(void) {
   Choice(y, snesrecomp_get_no_sprite_limits() ? "REMOVED" : "ORIGINAL", s == 5, C_BLUE); y += st;
   Row(6, y, "FPS COUNTER", C_LIGHT);
   Toggle(y, g_fps, s == 6); y += st;
-  Row(7, y, "BACK", C_LIGHT);
-  static const char *const help[8] = {
+  Row(7, y, "SOFT GLOW", C_LIGHT);
+  { static const char *const n[3] = { "OFF", "SOFT", "STRONG" }; Choice(y, n[g_glow], s == 7, g_glow ? C_GREEN : C_MID); } y += st;
+  Row(8, y, "BACK", C_LIGHT);
+  static const char *const help[9] = {
     "WINDOWED OR FULLSCREEN", "WINDOW SIZE (WINDOWED ONLY)", "BILINEAR SCALING (SOFTER)",
-    "SYNC TO THE DISPLAY", "BLEND FRAMES (FLICKER)", "REMOVES SPRITE FLICKER", "SHOW FRAMES PER SECOND", ""
+    "SYNC TO THE DISPLAY", "BLEND FRAMES (FLICKER)", "REMOVES SPRITE FLICKER", "SHOW FRAMES PER SECOND", "HALO ON BRIGHT SPOTS", ""
   };
   Footer(help[s]);
 }

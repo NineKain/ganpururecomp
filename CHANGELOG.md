@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- New VIDEO option SOFT GLOW (off / soft / strong): a subtle halo on bright spots, off by default.
 - Game pauses automatically when the window loses focus and resumes when it returns (a manual pause stays paused; off during netplay).
 - Rumble: no more false "hurt" pulses while walking; stronger fire tick (A/X/Y).
 - Settings menu text no longer clips.
