@@ -705,13 +705,13 @@ static void DrawWide(void) {
   Choice(y, kEdgeName[g_edges], s == 1, C_GREEN); y += st;
   Row(2, y, "WIDE ACTORS", C_LIGHT);
   Toggle(y, g_actors, s == 2); y += st;
-  Row(3, y, "HUD AT EDGES", C_LIGHT);
+  Row(3, y, "HUD AT CORNERS", C_LIGHT);
   Toggle(y, g_hud, s == 3); y += st;
   Row(4, y, "BACK", C_LIGHT);
   static const char *const help[5] = {
     "4:3 IS THE ORIGINAL PICTURE", "EXTEND = REAL ROOM, BLACK = 4:3 CORE",
     "SHOW ACTORS IN THE MARGINS",
-    "HUD FOLLOWS THE WIDE PICTURE EDGES", ""
+    "HUD AT THE SCREEN CORNERS", ""
   };
   Footer(help[s]);
 }

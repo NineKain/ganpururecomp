@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- First official **Linux (x86-64)** build: `GunmansProof-v0.3.0-linux-x86_64.tar.gz`.
+  Needs glibc 2.39 or newer (Ubuntu 24.04+, Fedora 40+, Debian 13+), OpenGL and
+  FreeType. SDL is built in.
+
 ## 0.2.0 (in progress)
 
 - Nothing yet.
@@ -10,7 +16,7 @@ First release.
 
 - True widescreen (16:9, 16:10, 21:9, custom) for gameplay, NPC dialogue and the
   pause screen. Unused side space stays black; the character stays centred.
-- HUD follows the edges of the widescreen picture; widescreen survives screen shake.
+- HUD stays pinned to the screen corners (floating over the black side area is fine); widescreen survives screen shake.
 - Text speed (x1 / x2 / x3 / instant) and faster room fades.
 - PAD FEEDBACK: very light controller rumble when firing and when losing a heart.
 - Skip intro with Start, save states, rewind, fast-forward.

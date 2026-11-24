@@ -29,9 +29,9 @@ own routines more often or earlier.
 
 ## Play (Windows release)
 
-1. Put your ROM next to the exe, named `GunmansProof.sfc`, or pick it in the
-   launcher, or drag it onto the exe.
-2. Run `GunmansProofSNESRecomp.exe`.
+1. Run `GunmansProofSNESRecomp.exe`. The launcher finds your ROM automatically if
+   it sits next to the exe and is named `72f6229a-Gunmans_Proof_English_v1.03.sfc`; otherwise click
+   **Browse For ROM** (the ROM is verified by its checksum, so any file name works there).
 
 Your ROM must match the checked revision (see [ROM identity](#rom-identity)).
 

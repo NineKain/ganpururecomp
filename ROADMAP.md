@@ -1,5 +1,12 @@
 # Roadmap
 
+## 0.3.0: Linux release
+
+- Ship a Linux x86-64 tar.gz (done for 0.3.0; see CHANGELOG).
+- Test on more distros and Steam Deck; build on an older base image for wider
+  glibc compatibility (or an AppImage).
+- Wayland / gamepad / audio checks on real hardware.
+
 ## 0.2.0 candidates
 
 Verification gaps from 0.1.0 (fix or confirm first):
