@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Game pauses automatically when the window loses focus and resumes when it returns (a manual pause stays paused; off during netplay).
+- Rumble: no more false "hurt" pulses while walking; stronger fire tick (A/X/Y).
+- Settings menu text no longer clips.
+
 ## 0.3.0
 
 - First official **Linux (x86-64)** build: `GunmansProof-v0.3.0-linux-x86_64.tar.gz`.

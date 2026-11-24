@@ -4259,6 +4259,19 @@ error_reading:;
       if (HandleDeviceEvent(&event))
         continue;
       switch (event.type) {
+      case SDL_EVENT_WINDOW_FOCUS_LOST:
+      case SDL_EVENT_WINDOW_FOCUS_GAINED: {
+        /* Pause while the window is in the background; resume only if we were
+         * the ones who paused (a manual pause stays paused). */
+        static uint8 blur_paused;
+        if (g_netplay_session) break;
+        if (event.type == SDL_EVENT_WINDOW_FOCUS_LOST && !g_paused) {
+          g_paused = 1; blur_paused = 1;
+        } else if (event.type == SDL_EVENT_WINDOW_FOCUS_GAINED && blur_paused) {
+          g_paused = 0; blur_paused = 0;
+        }
+        break;
+      }
       case SDL_MOUSEWHEEL:
         if (SDL_GetModState() & KMOD_CTRL && event.wheel.y != 0)
           ChangeWindowScale(event.wheel.y > 0 ? 1 : -1);
