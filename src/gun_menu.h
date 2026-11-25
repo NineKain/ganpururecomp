@@ -23,7 +23,6 @@ int    GunMenu_AspectMode(void);      /* effective mode (4x3 when widescreen is 
 double GunMenu_FixedAspect(void);     /* displayed w/h of a fixed mode; 0 for Auto */
 int    GunMenu_WindowBaseWidth(void);
 int    GunMenu_WideActors(void);      /* draw actors in the margins */
-int    GunMenu_Glow(void);            /* 0 off, 1 soft, 2 strong */
 int    GunMenu_RoomFades(void);       /* 0 normal, 1 fast, 2 faster */
 int    GunMenu_TextSpeed(void);       /* 0 normal, 1 x2, 2 x3, 3 instant */
 int    GunMenu_SkipIntro(void);       /* Start skips the opening cutscene */

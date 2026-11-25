@@ -63,7 +63,6 @@ hotkeys can be edited in `config.ini`.
 | WIDESCREEN | Aspect ratio, side edges (EXTEND / MIRROR / BLACK), wide actors, HUD in corners |
 | VOLUME | Master volume |
 | CONTROLS | Keyboard and controller remapping |
-| SOFT GLOW (Video page) | Subtle halo on bright spots: off / soft / strong |
 | SKIP INTRO | Start skips the opening story (on by default) |
 | TEXT SPEED | NORMAL / X2 / X3 / INSTANT |
 | ROOM FADES | NORMAL / FAST / FASTER |

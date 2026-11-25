@@ -306,55 +306,6 @@ static void GunPadFeedback(int play)
         prev_hearts = h;
     }
 }
-/* ---- Soft glow ----------------------------------------------------------
- * Bright pass -> blur -> additive blend, on the finished frame. Only pixels
- * well above mid-brightness bleed (muzzle flashes, highlights, water glints),
- * so the art keeps its crisp pixel look. */
-static void GunEndFrame(const uint8_t *field, unsigned number)
-{
-    (void)field; (void)number;
-    int mode = GunMenu_Glow();
-    if (!mode || !g_ppu || !g_ppu->renderBuffer) return;
-    const int w = g_ppu->renderPitch / 4, h = 224;
-    if (w <= 0 || w > 1024) return;
-    static uint8_t bright[224 * 1024], tmp[224 * 1024];
-    uint8_t *buf = g_ppu->renderBuffer;
-    const size_t pitch = g_ppu->renderPitch;
-    for (int y = 0; y < h; y++) {
-        const uint8_t *row = buf + y * pitch;
-        for (int x = 0; x < w; x++) {
-            const uint8_t *px = row + x * 4;
-            int lum = (px[2] * 77 + px[1] * 150 + px[0] * 29) >> 8;     /* 0..255 */
-            int v = (lum - 200) * 5;                                   /* only the brightest ~20% */
-            bright[y * w + x] = v < 0 ? 0 : v > 255 ? 255 : v;
-        }
-    }
-    const int R = 5;
-    for (int pass = 0; pass < 2; pass++) {                              /* two box blurs ~ gaussian */
-        for (int y = 0; y < h; y++)
-            for (int x = 0; x < w; x++) {
-                int sum = 0;
-                for (int k = -R; k <= R; k++) { int xx = x + k; if (xx >= 0 && xx < w) sum += bright[y * w + xx]; }
-                tmp[y * w + x] = sum / (2 * R + 1);
-            }
-        for (int y = 0; y < h; y++)
-            for (int x = 0; x < w; x++) {
-                int sum = 0;
-                for (int k = -R; k <= R; k++) { int yy = y + k; if (yy >= 0 && yy < h) sum += tmp[yy * w + x]; }
-                bright[y * w + x] = sum / (2 * R + 1);
-            }
-    }
-    const int gain = mode == 2 ? 3 : 1;                                 /* /2 below: 0.5x or 1.5x */
-    for (int y = 0; y < h; y++) {
-        uint8_t *row = buf + y * pitch;
-        for (int x = 0; x < w; x++) {
-            int g = (bright[y * w + x] * gain) >> 1;
-            if (!g) continue;
-            uint8_t *px = row + x * 4;
-            for (int c = 0; c < 3; c++) { int v = px[c] + g; px[c] = v > 255 ? 255 : v; }
-        }
-    }
-}
 static void GunBeginFrame(unsigned n)
 {
     (void)n;
@@ -511,7 +462,6 @@ static const SnesDesktopHostGame kGameHost = {
     .extra_inputs        = GunExtraInputs,
     .want_turbo          = GunWantTurbo,
     .begin_sim_frame     = GunBeginFrame,
-    .end_sim_frame       = GunEndFrame,
     .configure_launcher  = GunConfigureLauncher,
     .menu_hotkey         = SDLK_INSERT,
     .menu_open           = GunMenu_Open,
