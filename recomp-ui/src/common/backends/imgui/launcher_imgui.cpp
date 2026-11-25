@@ -2519,15 +2519,15 @@ void draw_game_panel(LauncherModel* m, const LauncherTheme& th, bool fill_h = fa
     // say so and give the in-app browser its own control, rather than leaving
     // the player with a Browse button whose backend cannot run.
     if (builtin_file_picker_should_be_offered()) {
-        ImGui::TextColored(col(th.text_muted), "%s",
-                           g_native_picker_failed
+        ImGui::Dummy(ImVec2(0, px(4)));
+        ImGui::PushStyleColor(ImGuiCol_Text, col(th.text_muted));
+        ImGui::TextWrapped("%s", g_native_picker_failed
                                ? "The desktop file picker could not run."
                                : "No desktop file picker (zenity/kdialog) found.");
+        ImGui::PopStyleColor();
+        ImGui::Dummy(ImVec2(0, px(2)));
         char builtin_label[64];
-        snprintf(builtin_label, sizeof(builtin_label), "%s %s",
-                 ui_text("Browse For"), ui_text(noun));
-        std::strncat(builtin_label, " (built-in)",
-                     sizeof(builtin_label) - std::strlen(builtin_label) - 1);
+        snprintf(builtin_label, sizeof(builtin_label), "%s", "Browse (built-in)");
         if (ImGui::Button(builtin_label, ImVec2(availw, px(28)))) {
             const SystemProfile* prof = (const SystemProfile*)m->profile;
             char title[64];
@@ -2695,8 +2695,8 @@ void draw_save_row(LauncherModel* m, const LauncherTheme& th) {
     if (has_save) {
         // Just the file name (no size annotation) — right-elided with "…" so a
         // long name never runs under the Import/Clear buttons to its right.
-        const float buttons_w = bw * 2 + px(th.spacing_sm);
-        const float avail = ImGui::GetContentRegionAvail().x - buttons_w - px(th.spacing_md);
+        /* Import/Clear sit on their own row below, so the name gets the full line. */
+        const float avail = ImGui::GetContentRegionAvail().x - px(th.spacing_sm);
         char shown[128];
         snprintf(shown, sizeof shown, "%s", base);
         if (avail > 0 && ImGui::CalcTextSize(shown).x > avail) {
@@ -2713,10 +2713,11 @@ void draw_save_row(LauncherModel* m, const LauncherTheme& th) {
     } else {
         ImGui::TextColored(col(th.text_muted), "no save yet");
     }
-    ImGui::SameLine(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - bw*2 - px(th.spacing_sm));
+    const float row_w = ImGui::GetContentRegionAvail().x;
+    const float half_w = std::max(bw, (row_w - px(th.spacing_sm)) * 0.5f);
     static const char* kSramPatterns[] = { "*.srm", "*.sav" };
     ImGui::BeginDisabled(!sp[0]);
-    if (ImGui::Button("Import", ImVec2(bw, px(30)))) {
+    if (ImGui::Button("Import", ImVec2(half_w, px(30)))) {
         ui_pick_file(m, "Import SRAM save", {"*.srm", "*.sav"},
                      "Battery save (.srm .sav)", [m](const char* path) {
                          if (path)
@@ -2725,7 +2726,7 @@ void draw_save_row(LauncherModel* m, const LauncherTheme& th) {
     }
     ImGui::SameLine(0, px(th.spacing_sm));
     ImGui::BeginDisabled(!has_save);              // nothing to clear when no save exists
-    if (ImGui::Button(ui_text("Clear"), ImVec2(bw, px(30))))
+    if (ImGui::Button(ui_text("Clear"), ImVec2(half_w, px(30))))
         launcher_model_clear_sram(m);             // backs up to .bak, then deletes
     ImGui::EndDisabled();
     ImGui::EndDisabled();

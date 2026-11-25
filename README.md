@@ -60,7 +60,7 @@ hotkeys can be edited in `config.ini`.
 | Row | What it does |
 |---|---|
 | VIDEO | Fullscreen, window size, smoothing, vsync, frame blend, sprite limit, FPS counter |
-| WIDESCREEN | Aspect ratio, side edges (EXTEND / MIRROR / BLACK), wide actors, HUD in corners |
+| WIDESCREEN | Aspect ratio, side edges (EXTEND / BLACK), wide actors, HUD in corners |
 | VOLUME | Master volume |
 | CONTROLS | Keyboard and controller remapping |
 | SKIP INTRO | Start skips the opening story (on by default) |

@@ -53,7 +53,7 @@
 
 static int g_aspect = kGunAspect_Auto;
 static int g_aspect_loaded;
-static int g_edges = 0;        /* 0 extend, 1 mirror, 2 black */
+static int g_edges = 0;        /* 0 extend, 2 black (1 = retired mirror mode) */
 static int g_actors = 1;       /* draw actors in the widescreen margins */
 static int g_textspeed = 0;   /* 0 normal, 1 x2, 2 x3, 3 instant */
 static int g_rumble = 1;      /* DualSense/pad feedback: 0 off, 1 subtle */
@@ -87,7 +87,7 @@ static void AspectLoad(void) {
     char k[32]; int v;
     if (sscanf(line, "%31[a-z]=%d", k, &v) != 2) continue;
     if (!strcmp(k, "aspect") && v >= 0 && v < kGunAspect_Count) g_aspect = v;
-    else if (!strcmp(k, "edges") && v >= 0 && v < 3) g_edges = v;
+    else if (!strcmp(k, "edges") && v >= 0 && v < 3) g_edges = (v == 1) ? 0 : v;   /* MIRROR was removed: it mirrored the HUD text too */
     else if (!strcmp(k, "actors")) g_actors = v != 0;
     else if (!strcmp(k, "slide")) g_slide = v != 0;
     else if (!strcmp(k, "hud")) g_hud = v != 0;
@@ -145,7 +145,7 @@ int GunMenu_WindowBaseWidth(void) {
   return a > 0.0 ? (int)(224.0 * a + 0.5) : 398;   /* Auto opens as 16:9 */
 }
 
-static const char *const kEdgeName[3] = { "EXTEND", "MIRROR", "BLACK" };
+static const char *const kEdgeName[3] = { "EXTEND", "EXTEND", "BLACK" };
 
 /* Called by the host every simulated frame (begin_sim_frame): how the extra
  * widescreen columns are filled. Extend shows what the PPU renders there
@@ -399,7 +399,7 @@ static void Adjust(int d) {
       SetAspect((m + d + kGunAspect_Count) % kGunAspect_Count);
       break;
     }
-    case 1: g_edges = (g_edges + d + 3) % 3; AspectSave(); break;
+    case 1: g_edges = (g_edges == 2) ? 0 : 2; AspectSave(); break;   /* EXTEND <-> BLACK */
     case 2: g_actors = !g_actors; AspectSave(); break;
     case 3: g_hud = !g_hud; AspectSave(); break;
     default: break;
