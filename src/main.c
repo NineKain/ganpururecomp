@@ -264,8 +264,6 @@ static void GunConfigureLauncher(RecompLauncherCGameInfo *gi)
  * a heart is lost. Hearts are the only saturated red in the top-left of the
  * picture, so a drop in their pixel count (while the screen is fully bright)
  * means the player was hurt. */
-static int g_hearts_cache;
-
 static int GunHeartPixels(void)
 {
     if (!g_ppu || !g_ppu->renderBuffer) return -1;
@@ -296,7 +294,7 @@ static void GunPadFeedback(int play)
     if (cool > 0) cool--;
     int bright = g_ram[0x0140] == 0x0F;
     if (!play || !bright || g_ram[0x016E] != 0 || !GunMenu_PadFeedback()) { prev_hearts = -1; stable = 0; return; }
-    int h = g_hearts_cache;
+    int h = GunHeartPixels();
     if (getenv("GUN_RUMBLE_LOG")) { static int k; if (!(k++ % 30)) fprintf(stderr, "HEARTS %d\n", h); }
     if (h >= 0) {
         if (prev_hearts >= 0 && stable >= 20 && h < prev_hearts - prev_hearts / 6 && cool == 0) {
@@ -308,49 +306,55 @@ static void GunPadFeedback(int play)
         prev_hearts = h;
     }
 }
-/* ---- Lighting -----------------------------------------------------------
- * A colour grade (multiplicative tint, so the black side margins stay black)
- * plus a vignette, applied to the finished frame. Heart-loss rumble reads the
- * hearts BEFORE grading so the vignette can't make them look like damage. */
+/* ---- Soft glow ----------------------------------------------------------
+ * Bright pass -> blur -> additive blend, on the finished frame. Only pixels
+ * well above mid-brightness bleed (muzzle flashes, highlights, water glints),
+ * so the art keeps its crisp pixel look. */
 static void GunEndFrame(const uint8_t *field, unsigned number)
 {
     (void)field; (void)number;
-    if (!g_ppu || !g_ppu->renderBuffer) return;
-    g_hearts_cache = GunHeartPixels();
-    int mode = GunMenu_Light();
-    if (!mode) return;
+    int mode = GunMenu_Glow();
+    if (!mode || !g_ppu || !g_ppu->renderBuffer) return;
     const int w = g_ppu->renderPitch / 4, h = 224;
-    if (w <= 0) return;
-    /* tint r,g,b (x256), brightness, vignette strength (x256) */
-    static const int T[4][5] = {
-        { 256, 256, 256, 256,   0 },
-        { 285, 262, 208, 256,  80 },   /* golden hour: warm, gentle edges */
-        { 262, 190, 215, 235, 105 },   /* dusk: orange-magenta, darker */
-        { 110, 165, 290, 225, 125 },   /* night: cool blue, darker */
-    };
-    const int *t = T[mode];
+    if (w <= 0 || w > 1024) return;
+    static uint8_t bright[224 * 1024], tmp[224 * 1024];
     uint8_t *buf = g_ppu->renderBuffer;
     const size_t pitch = g_ppu->renderPitch;
-    const float cx = w * 0.5f, cy = h * 0.5f;
+    for (int y = 0; y < h; y++) {
+        const uint8_t *row = buf + y * pitch;
+        for (int x = 0; x < w; x++) {
+            const uint8_t *px = row + x * 4;
+            int lum = (px[2] * 77 + px[1] * 150 + px[0] * 29) >> 8;     /* 0..255 */
+            int v = (lum - 200) * 5;                                   /* only the brightest ~20% */
+            bright[y * w + x] = v < 0 ? 0 : v > 255 ? 255 : v;
+        }
+    }
+    const int R = 5;
+    for (int pass = 0; pass < 2; pass++) {                              /* two box blurs ~ gaussian */
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++) {
+                int sum = 0;
+                for (int k = -R; k <= R; k++) { int xx = x + k; if (xx >= 0 && xx < w) sum += bright[y * w + xx]; }
+                tmp[y * w + x] = sum / (2 * R + 1);
+            }
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++) {
+                int sum = 0;
+                for (int k = -R; k <= R; k++) { int yy = y + k; if (yy >= 0 && yy < h) sum += tmp[yy * w + x]; }
+                bright[y * w + x] = sum / (2 * R + 1);
+            }
+    }
+    const int gain = mode == 2 ? 3 : 1;                                 /* /2 below: 0.5x or 1.5x */
     for (int y = 0; y < h; y++) {
         uint8_t *row = buf + y * pitch;
-        float dy = (y - cy) / cy;
         for (int x = 0; x < w; x++) {
-            float dx = (x - cx) / cx;
-            float d = dx * dx * 0.55f + dy * dy;                    /* 0 centre .. ~1.5 corners */
-            float v = (d - 0.25f) / 1.1f;
-            v = v < 0 ? 0 : v > 1 ? 1 : v;
-            int vig = 256 - (int)(t[4] * v * v * (3 - 2 * v));       /* smoothstep falloff */
+            int g = (bright[y * w + x] * gain) >> 1;
+            if (!g) continue;
             uint8_t *px = row + x * 4;
-            int k0 = t[2] * t[3] >> 8, k1 = t[1] * t[3] >> 8, k2 = t[0] * t[3] >> 8;   /* B,G,R */
-            int b = (px[0] * k0 >> 8) * vig >> 8;
-            int g = (px[1] * k1 >> 8) * vig >> 8;
-            int r = (px[2] * k2 >> 8) * vig >> 8;
-            px[0] = b > 255 ? 255 : b; px[1] = g > 255 ? 255 : g; px[2] = r > 255 ? 255 : r;
+            for (int c = 0; c < 3; c++) { int v = px[c] + g; px[c] = v > 255 ? 255 : v; }
         }
     }
 }
-
 static void GunBeginFrame(unsigned n)
 {
     (void)n;
