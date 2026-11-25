@@ -2,11 +2,11 @@
 
 ## Unreleased
 
-- New CRT FILTER (Insert menu, VIDEO page; also in the launcher's Shader list): FAST (one pass: scanlines, light blur, faint glow, phosphor mask) and ACCURATE (four passes: linear-light beam softening, brightness-dependent scanline beam, halation glow, aperture-grille mask, display gamma). Original shaders in assets/shaders. Needs the OpenGL renderer; scanlines and the mask fade out on small windows and look best at 3x or larger.
+- New CRT FILTER (Insert menu > VIDEO > CRT FILTER, Enter opens a submenu): scanlines, blur, glow, phosphor mask and brightness are each adjustable and saved; RESET TO DEFAULTS restores the soft default (sharp pixels, light scanlines, no blur, a trace of glow). One original shader (assets/shaders/crt.glslp), also listed in the launcher's Shader dropdown. Needs the OpenGL renderer; scanlines and the mask fade out on small windows and look best at 3x or larger.
+- Removed controller rumble (PAD FEEDBACK) completely.
 - Removed the MIRROR side-edge mode (it mirrored the HUD text into the margin). A saved MIRROR setting falls back to EXTEND.
 - Launcher: the ROM panel no longer clips text (wrapped notice, shorter built-in browse button, Import/Clear on their own row).
 - Game pauses automatically when the window loses focus and resumes when it returns (a manual pause stays paused; off during netplay).
-- Rumble: no more false "hurt" pulses while walking; stronger fire tick (A/X/Y).
 - Settings menu text no longer clips.
 
 ## 0.3.0

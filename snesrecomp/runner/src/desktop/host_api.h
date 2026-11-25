@@ -86,6 +86,9 @@ int snesrecomp_get_frame_blend(void);
 void snesrecomp_set_shader(const char *path);
 const char *snesrecomp_get_shader(void);
 int snesrecomp_shader_supported(void);
+/* Tune a "#pragma parameter" of the active shader live (not persisted by the
+ * host; the frontend re-applies its own saved values at startup). */
+void snesrecomp_set_shader_param(const char *id, float value);
 
 /* Frames of local input-latency hiding.  frames: 0 = off.  Negative values
  * are clamped to 0. */

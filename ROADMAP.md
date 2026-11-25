@@ -15,7 +15,6 @@ Verification gaps from 0.1.0 (fix or confirm first):
 - Check the beach map and other rooms, including rooms wider than 512 px.
 - Projectile and effect sprites popping at the original screen edge.
 - Audio during fast-forwarded room fades.
-- Controller rumble feel on a real DualSense (strengths in `src/main.c`).
 
 QoL ideas (not started):
 - Auto-resume (framework `Autosave` option exposed in the menu).

@@ -212,11 +212,6 @@ static uint32_t GunExtraInputs(uint32_t human)
     int story = !been_play && !play && g_ram[0x0106] == 3 && GunW(0x0A60) != 0 &&
                 GunW(0x0B2A) == 0 && GunW(0x0B28) == 0;
     if (edge && story && GunMenu_SkipIntro()) g_skip_pending = 1;
-    { static int prev_a;
-      int a = (human & (SNES_PAD_A | SNES_PAD_X | SNES_PAD_Y)) != 0;
-      if (a && !prev_a && play && g_ram[0x016E] == 0 && GunMenu_PadFeedback())
-          snesrecomp_desktop_rumble(0, 16000, 40);         /* ~24% of the light motor, 40 ms: a soft tick */
-      prev_a = a; }
     return 0;
 }
 /* ---- Room fades --------------------------------------------------------
@@ -259,53 +254,6 @@ static void GunConfigureLauncher(RecompLauncherCGameInfo *gi)
     gi->window_icon_path = "assets/img/icon.png";   /* staged by CMake beside the exe */
 }
 
-/* ---- Controller feedback ------------------------------------------------
- * Very light rumble: a faint tick when the gun fires and a short low thump when
- * a heart is lost. Hearts are the only saturated red in the top-left of the
- * picture, so a drop in their pixel count (while the screen is fully bright)
- * means the player was hurt. */
-static int GunHeartPixels(void)
-{
-    if (!g_ppu || !g_ppu->renderBuffer) return -1;
-    /* The hearts are a small strip (rows 22-31) at the far top-left of the
-     * visible picture. Find the first saturated-red pixel in that strip and only
-     * count a fixed-width window from there, so red things walking around the
-     * rest of the screen (flowers, clothes, the player) can never look like damage. */
-    int w = g_ppu->renderPitch / 4, x0 = -1;
-    for (int x = 0; x < w && x0 < 0; x++)
-        for (int y = 22; y < 32; y++) {
-            const uint8_t *px = g_ppu->renderBuffer + (size_t)y * g_ppu->renderPitch + x * 4;
-            if (px[2] > 190 && px[1] < 70 && px[0] < 70) { x0 = x; break; }
-        }
-    if (x0 < 0 || x0 > 120) return 0;
-    int n = 0;
-    for (int y = 22; y < 32; y++) {
-        const uint8_t *row = g_ppu->renderBuffer + (size_t)y * g_ppu->renderPitch;
-        for (int x = x0; x < x0 + 64 && x < w; x++) {
-            const uint8_t *px = row + x * 4;
-            if (px[2] > 190 && px[1] < 70 && px[0] < 70) n++;
-        }
-    }
-    return n;
-}
-static void GunPadFeedback(int play)
-{
-    static int prev_hearts = -1, stable, prev_a, cool;
-    if (cool > 0) cool--;
-    int bright = g_ram[0x0140] == 0x0F;
-    if (!play || !bright || g_ram[0x016E] != 0 || !GunMenu_PadFeedback()) { prev_hearts = -1; stable = 0; return; }
-    int h = GunHeartPixels();
-    if (getenv("GUN_RUMBLE_LOG")) { static int k; if (!(k++ % 30)) fprintf(stderr, "HEARTS %d\n", h); }
-    if (h >= 0) {
-        if (prev_hearts >= 0 && stable >= 20 && h < prev_hearts - prev_hearts / 6 && cool == 0) {
-            snesrecomp_desktop_rumble(9000, 3000, 110);    /* ~14% / ~5% */
-            cool = 90;
-            stable = 0;
-        } else if (h == prev_hearts) stable++;
-        else if (h > prev_hearts) stable = 0;
-        prev_hearts = h;
-    }
-}
 static void GunBeginFrame(unsigned n)
 {
     (void)n;
@@ -331,7 +279,6 @@ static void GunBeginFrame(unsigned n)
      * inside the room bounds. Everything else (title, name entry, cutscenes,
      * pause, inventory, map) stays centred at the authentic 256px. */
     int play = GunIsPlay();
-    GunPadFeedback(play);
     int ws = play || GunIsPause();
     if (ws) {
         l = cam - lo - 2; r = hi - cam - 2;

@@ -130,6 +130,36 @@ static void ApplySwapInterval(void) {
   if (!ok && interval < 0) SDL_GL_SetSwapInterval(1);
 }
 
+/* Runtime shader-parameter overrides (id -> value), kept across shader reloads
+ * so a frontend menu can tune a preset's "#pragma parameter" values live. */
+typedef struct { char id[32]; float value; } ShaderOverride;
+static ShaderOverride g_shader_overrides[24];
+static int g_n_shader_overrides;
+
+static void ApplyShaderOverrides(void) {
+  if (!g_glsl_shader) return;
+  for (int i = 0; i < g_n_shader_overrides; i++)
+    for (GlslParam *p = g_glsl_shader->first_param; p; p = p->next)
+      if (!strcmp(p->id, g_shader_overrides[i].id)) {
+        p->value = g_shader_overrides[i].value;
+        p->has_value = true;
+      }
+}
+
+void OpenGLRenderer_SetShaderParam(const char *id, float value) {
+  if (!id || !id[0]) return;
+  int i = 0;
+  for (; i < g_n_shader_overrides; i++)
+    if (!strcmp(g_shader_overrides[i].id, id)) break;
+  if (i == g_n_shader_overrides) {
+    if (i >= (int)(sizeof g_shader_overrides / sizeof g_shader_overrides[0])) return;
+    snprintf(g_shader_overrides[i].id, sizeof g_shader_overrides[i].id, "%s", id);
+    g_n_shader_overrides++;
+  }
+  g_shader_overrides[i].value = value;
+  ApplyShaderOverrides();
+}
+
 static void LoadShaderFromConfig(void) {
   const char *want = g_config.shader ? g_config.shader : "";
   if (g_shader_resolved && strcmp(want, g_shader_path) == 0)
@@ -142,6 +172,7 @@ static void LoadShaderFromConfig(void) {
   g_shader_resolved = true;
   if (want[0])
     g_glsl_shader = GlslShader_CreateFromFile(want);
+  ApplyShaderOverrides();
 }
 
 static bool OpenGLRenderer_Init(SDL_Window *window) {

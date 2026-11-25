@@ -1,10 +1,10 @@
-// Gunman's Proof Recomp: original "CRT Accurate" shader, pass 1 of 4.
-// Linearise the picture and apply the horizontal beam softness at source
-// resolution. Original work for this project (GPL-3.0); the structure
-// (linear light -> beam -> halation -> mask) follows the general approach of
+// Gunman's Proof Recomp: CRT shader, pass 1 of 4.
+// Converts to linear light and applies optional horizontal beam softness at
+// source resolution. Original work for this project (GPL-3.0); the structure
+// (linear light -> beam -> glow -> mask) follows the general approach of
 // high-end CRT shaders, but none of their code is used here.
 
-#pragma parameter BEAM_H "Horizontal beam softness (source px)" 0.55 0.05 1.5 0.05
+#pragma parameter BEAM_H "Horizontal beam softness (source px)" 0.20 0.15 1.2 0.05
 #pragma parameter IN_GAMMA "CRT input gamma" 2.4 1.8 3.0 0.05
 
 #ifdef VERTEX

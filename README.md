@@ -19,9 +19,9 @@ widescreen, 60 fps, gamepad support and a pixel-art in-game settings menu.
 - **Room fades**: normal, fast (default) or faster.
 - **Skip intro**: press Start during the opening story.
 - Save states, rewind, fast-forward.
-- DualSense, Xbox and other gamepads (SDL3), remappable controls, and very
-  light rumble (a faint tick when the gun fires, a short thump when you lose a
-  heart; PAD FEEDBACK in the menu turns it off).
+- DualSense, Xbox and other gamepads (SDL3) and remappable controls.
+- **CRT filter** (OpenGL renderer): scanlines, optional blur and glow, and a
+  phosphor mask, each adjustable in a submenu (Video > CRT FILTER).
 - Press **Insert** in-game for the settings menu.
 
 Nothing in the ROM is modified. Text speed, fades and skip-intro run the game's
@@ -63,11 +63,10 @@ hotkeys can be edited in `config.ini`.
 | WIDESCREEN | Aspect ratio, side edges (EXTEND / BLACK), wide actors, HUD in corners |
 | VOLUME | Master volume |
 | CONTROLS | Keyboard and controller remapping |
-| CRT FILTER (Video page) | OFF / FAST / ACCURATE screen look (OpenGL renderer; best at 3x window size or larger) |
+| CRT FILTER (Video page, Enter) | Submenu: on/off, scanlines, blur, glow, phosphor mask, brightness (OpenGL renderer; scanlines and mask need a 3x window or larger) |
 | SKIP INTRO | Start skips the opening story (on by default) |
 | TEXT SPEED | NORMAL / X2 / X3 / INSTANT |
 | ROOM FADES | NORMAL / FAST / FASTER |
-| PAD FEEDBACK | OFF / SUBTLE (controller rumble) |
 
 Known limits: projectile and effect sprites can still pop at the original
 screen edge, rooms wider than 512 px are untested, and audio speeds up during

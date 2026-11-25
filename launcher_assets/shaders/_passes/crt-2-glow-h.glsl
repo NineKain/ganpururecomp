@@ -1,4 +1,4 @@
-// Gunman's Proof Recomp: "CRT Accurate" pass 2 of 4 - halation, horizontal.
+// Gunman's Proof Recomp: CRT shader, pass 2 of 4 - glow, horizontal.
 // Original work for this project (GPL-3.0).
 
 #ifdef VERTEX
@@ -18,12 +18,13 @@ in vec2 vTexCoord;
 out vec4 FragColor;
 
 void main() {
-    // This pass renders at half resolution; step 2 source pixels per tap.
+    // Renders at half resolution; each tap is 2 source pixels. A tight
+    // kernel (sigma ~1.2 taps) keeps the glow close to the bright pixel.
     float step_x = 2.0 / InputSize.x;
     vec3 acc = vec3(0.0);
     float wsum = 0.0;
-    for (int i = -4; i <= 4; i++) {
-        float w = exp(-float(i * i) / 8.0);          // sigma = 2 taps
+    for (int i = -3; i <= 3; i++) {
+        float w = exp(-float(i * i) / 2.9);
         acc += texture(Texture, vTexCoord + vec2(step_x * float(i), 0.0)).rgb * w;
         wsum += w;
     }

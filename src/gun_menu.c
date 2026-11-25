@@ -56,12 +56,35 @@ static int g_aspect_loaded;
 static int g_edges = 0;        /* 0 extend, 2 black (1 = retired mirror mode) */
 static int g_actors = 1;       /* draw actors in the widescreen margins */
 static int g_textspeed = 0;   /* 0 normal, 1 x2, 2 x3, 3 instant */
-static int g_rumble = 1;      /* DualSense/pad feedback: 0 off, 1 subtle */
 static int g_fades = 1;       /* room transitions: 0 normal, 1 fast, 2 faster */
 static int g_skipintro = 1;    /* Start skips the opening cutscene */
 static int g_hud = 1;          /* pin the HUD to the frame corner */
 static int g_slide = 1;        /* slide the view at room edges (else fixed centre) */
 static int g_fps = 0;          /* FPS counter */
+
+/* CRT filter (GLSL preset assets/shaders/crt.glslp). The look is a handful of
+ * percentages the submenu edits; they are pushed to the shader as parameters. */
+static const char kCrtPath[] = "assets/shaders/crt.glslp";
+static int g_crt_scan = 70;    /* scanline strength, % */
+static int g_crt_blur = 10;    /* horizontal beam softness, % */
+static int g_crt_glow = 10;    /* glow around bright areas, % */
+static int g_crt_mask = 25;    /* phosphor mask, % */
+static int g_crt_bright = 110; /* brightness, % */
+
+static int CrtOn(void) {
+  const char *p = snesrecomp_get_shader();
+  return p && p[0];
+}
+static void CrtApply(void) {
+  snesrecomp_set_shader_param("SCAN", g_crt_scan / 100.0f);
+  snesrecomp_set_shader_param("BEAM_H", 0.20f + 0.70f * g_crt_blur / 100.0f);
+  snesrecomp_set_shader_param("BLOOM", 0.30f * g_crt_glow / 100.0f);
+  snesrecomp_set_shader_param("MASK", g_crt_mask / 100.0f);
+  snesrecomp_set_shader_param("GAIN", g_crt_bright / 100.0f);
+}
+static void CrtDefaults(void) {
+  g_crt_scan = 70; g_crt_blur = 10; g_crt_glow = 10; g_crt_mask = 25; g_crt_bright = 110;
+}
 
 static void IniPath(char *out, size_t n) {
   const char *c = snesrecomp_desktop_config_path();
@@ -92,16 +115,25 @@ static void AspectLoad(void) {
     else if (!strcmp(k, "slide")) g_slide = v != 0;
     else if (!strcmp(k, "hud")) g_hud = v != 0;
     else if (!strcmp(k, "skipintro")) g_skipintro = v != 0;
-    else if (!strcmp(k, "rumble")) g_rumble = v != 0;
     else if (!strcmp(k, "fades")) g_fades = v < 0 ? 0 : v > 2 ? 2 : v;
     else if (!strcmp(k, "textspeed")) g_textspeed = v < 0 ? 0 : v > 3 ? 3 : v;
     else if (!strcmp(k, "fps")) g_fps = v != 0;
+    else if (!strcmp(k, "crtscan")) g_crt_scan = v < 0 ? 0 : v > 100 ? 100 : v;
+    else if (!strcmp(k, "crtblur")) g_crt_blur = v < 0 ? 0 : v > 100 ? 100 : v;
+    else if (!strcmp(k, "crtglow")) g_crt_glow = v < 0 ? 0 : v > 100 ? 100 : v;
+    else if (!strcmp(k, "crtmask")) g_crt_mask = v < 0 ? 0 : v > 100 ? 100 : v;
+    else if (!strcmp(k, "crtbright")) g_crt_bright = v < 70 ? 70 : v > 150 ? 150 : v;
   }
   fclose(f);
   /* A saved "4:3 ORIGINAL" choice must survive a restart: the host's own
    * widescreen flag comes from config.ini and would otherwise override it. */
   snesrecomp_desktop_set_widescreen(g_aspect != kGunAspect_4x3);
   snes_osd_set_fps_visible(g_fps);
+  /* Early builds shipped separate crt-fast / crt-accurate presets; they are
+   * now one tweakable preset. */
+  const char *sh = snesrecomp_get_shader();
+  if (sh && (strstr(sh, "crt-fast") || strstr(sh, "crt-accurate"))) snesrecomp_set_shader(kCrtPath);
+  CrtApply();
 }
 
 static void AspectSave(void) {
@@ -110,13 +142,14 @@ static void AspectSave(void) {
   if (!path[0]) return;
   FILE *f = fopen(path, "w");
   if (!f) return;
-  fprintf(f, "aspect=%d\nedges=%d\nactors=%d\nslide=%d\nhud=%d\nskipintro=%d\nfps=%d\ntextspeed=%d\nfades=%d\nrumble=%d\n",
-          g_aspect, g_edges, g_actors, g_slide, g_hud, g_skipintro, g_fps, g_textspeed, g_fades, g_rumble);
+  fprintf(f, "aspect=%d\nedges=%d\nactors=%d\nslide=%d\nhud=%d\nskipintro=%d\nfps=%d\ntextspeed=%d\nfades=%d\n"
+          "crtscan=%d\ncrtblur=%d\ncrtglow=%d\ncrtmask=%d\ncrtbright=%d\n",
+          g_aspect, g_edges, g_actors, g_slide, g_hud, g_skipintro, g_fps, g_textspeed, g_fades,
+          g_crt_scan, g_crt_blur, g_crt_glow, g_crt_mask, g_crt_bright);
   fclose(f);
 }
 
 int GunMenu_WideActors(void) { if (!g_aspect_loaded) AspectLoad(); return g_actors; }
-int GunMenu_PadFeedback(void) { if (!g_aspect_loaded) AspectLoad(); return g_rumble; }
 int GunMenu_RoomFades(void) { if (!g_aspect_loaded) AspectLoad(); return g_fades; }
 int GunMenu_TextSpeed(void) { if (!g_aspect_loaded) AspectLoad(); return g_textspeed; }
 int GunMenu_SkipIntro(void) { if (!g_aspect_loaded) AspectLoad(); return g_skipintro; }
@@ -322,7 +355,7 @@ static void PadSave(void) {
 
 /* ── Menu state ──────────────────────────────────────────────────────────── */
 
-enum { SCR_MAIN, SCR_VIDEO, SCR_WIDE, SCR_CONTROLS, SCR_KEYS, SCR_PADS, SCR_N };
+enum { SCR_MAIN, SCR_VIDEO, SCR_WIDE, SCR_CONTROLS, SCR_KEYS, SCR_PADS, SCR_CRT, SCR_N };
 
 static struct {
   int open, scr, sel[SCR_N];
@@ -336,10 +369,11 @@ static struct {
 
 static int RowCount(void) {
   switch (M.scr) {
-  case SCR_MAIN: return 10;
+  case SCR_MAIN: return 9;
   case SCR_VIDEO: return 9;
   case SCR_WIDE: return 5;
   case SCR_CONTROLS: return 3;
+  case SCR_CRT: return 8;
   default: return NB + 2;   /* buttons, reset, back */
   }
 }
@@ -362,30 +396,13 @@ static void Back(void) {
   if (M.capture >= 0) { M.capture = -1; return; }
   if (M.scr == SCR_MAIN) Close();
   else if (M.scr == SCR_KEYS || M.scr == SCR_PADS) M.scr = SCR_CONTROLS;
+  else if (M.scr == SCR_CRT) M.scr = SCR_VIDEO;
   else M.scr = SCR_MAIN;
 }
 
 static int Clampi(int v, int lo, int hi) { return v < lo ? lo : v > hi ? hi : v; }
 
 static const char *const kVsyncName[3] = { "OFF", "ON", "ADAPTIVE" };
-
-/* CRT filter: OFF / FAST / ACCURATE are the two bundled presets; anything else
- * that the launcher or config.ini selected shows as CUSTOM. */
-static const char kCrtFast[] = "assets/shaders/crt-fast.glslp";
-static const char kCrtAccurate[] = "assets/shaders/crt-accurate.glslp";
-static int CrtMode(void) {
-  const char *p = snesrecomp_get_shader();
-  if (!p || !p[0]) return 0;
-  if (strstr(p, "crt-fast")) return 1;
-  if (strstr(p, "crt-accurate")) return 2;
-  return 3;
-}
-static void CrtCycle(int d) {
-  if (!snesrecomp_shader_supported()) return;
-  int c = CrtMode();
-  c = (c == 3) ? 0 : (c + (d < 0 ? 2 : 1)) % 3;
-  snesrecomp_set_shader(c == 1 ? kCrtFast : c == 2 ? kCrtAccurate : "");
-}
 
 static void Adjust(int d) {
   int r = M.sel[M.scr];
@@ -396,7 +413,6 @@ static void Adjust(int d) {
     else if (r == 4) { g_skipintro = !g_skipintro; AspectSave(); }
     else if (r == 5) { g_textspeed = Clampi(g_textspeed + (d < 0 ? -1 : 1), 0, 3); AspectSave(); }
     else if (r == 6) { g_fades = Clampi(g_fades + (d < 0 ? -1 : 1), 0, 2); AspectSave(); }
-    else if (r == 7) { g_rumble = !g_rumble; AspectSave(); }
     break;
   case SCR_VIDEO:
     switch (r) {
@@ -407,10 +423,20 @@ static void Adjust(int d) {
     case 4: snesrecomp_set_frame_blend(!snesrecomp_get_frame_blend()); break;
     case 5: snesrecomp_set_no_sprite_limits(!snesrecomp_get_no_sprite_limits()); break;
     case 6: g_fps = !g_fps; snes_osd_set_fps_visible(g_fps); AspectSave(); break;
-    case 7: CrtCycle(d); break;
+    case 7: if (snesrecomp_shader_supported()) snesrecomp_set_shader(CrtOn() ? "" : kCrtPath); break;
     default: break;
     }
     break;
+  case SCR_CRT: {
+    int *v[5] = { &g_crt_scan, &g_crt_blur, &g_crt_glow, &g_crt_mask, &g_crt_bright };
+    if (r == 0) { if (snesrecomp_shader_supported()) snesrecomp_set_shader(CrtOn() ? "" : kCrtPath); }
+    else if (r >= 1 && r <= 5) {
+      int *p = v[r - 1];
+      *p = Clampi(*p + (d < 0 ? -5 : 5), r == 5 ? 70 : 0, r == 5 ? 150 : 100);
+      CrtApply(); AspectSave();
+    }
+    break;
+  }
   case SCR_WIDE:
     switch (r) {
     case 0: {
@@ -444,15 +470,21 @@ static void Activate(void) {
     else if (r == 4) { Adjust(1); }
     else if (r == 5) { g_textspeed = (g_textspeed + 1) % 4; AspectSave(); }
     else if (r == 6) { g_fades = (g_fades + 1) % 3; AspectSave(); }
-    else if (r == 7) { g_rumble = !g_rumble; AspectSave(); }
-    else if (r == 8) { Close(); }
-    else if (r == 9) {
+    else if (r == 7) { Close(); }
+    else if (r == 8) {
       if (M.quit_armed) snesrecomp_request_exit();
       M.quit_armed = !M.quit_armed;
     }
     break;
   case SCR_VIDEO:
-    if (r == 8) Back(); else Adjust(1);
+    if (r == 8) Back();
+    else if (r == 7) M.scr = SCR_CRT;
+    else Adjust(1);
+    break;
+  case SCR_CRT:
+    if (r == 6) { CrtDefaults(); CrtApply(); AspectSave(); }
+    else if (r == 7) Back();
+    else if (r == 0) Adjust(1);
     break;
   case SCR_WIDE:
     if (r == 4) Back(); else Adjust(1);
@@ -680,10 +712,8 @@ static void DrawMain(void) {
   { static const char *const n[4] = { "NORMAL", "X2", "X3", "INSTANT" }; Choice(y, n[g_textspeed], s == 5, g_textspeed ? C_GREEN : C_MID); } y += st;
   Row(6, y, "ROOM FADES", C_LIGHT);
   { static const char *const n[3] = { "NORMAL", "FAST", "FASTER" }; Choice(y, n[g_fades], s == 6, g_fades ? C_GREEN : C_MID); } y += st;
-  Row(7, y, "PAD FEEDBACK", C_LIGHT);
-  Choice(y, g_rumble ? "SUBTLE" : "OFF", s == 7, g_rumble ? C_GREEN : C_MID); y += st;
-  Row(8, y, "RESUME", C_LIGHT); y += st;
-  Row(9, y, M.quit_armed ? "SURE? PRESS AGAIN" : "QUIT GAME", M.quit_armed ? C_RED : C_LIGHT);
+  Row(7, y, "RESUME", C_LIGHT); y += st;
+  Row(8, y, M.quit_armed ? "SURE? PRESS AGAIN" : "QUIT GAME", M.quit_armed ? C_RED : C_LIGHT);
   Footer("INSERT OR PS BUTTON CLOSES");
 }
 
@@ -708,15 +738,40 @@ static void DrawVideo(void) {
   Row(6, y, "FPS COUNTER", C_LIGHT);
   Toggle(y, g_fps, s == 6); y += st;
   Row(7, y, "CRT FILTER", C_LIGHT);
-  { static const char *const n[4] = { "OFF", "FAST", "ACCURATE", "CUSTOM" };
-    int c = CrtMode();
-    if (!snesrecomp_shader_supported()) Choice(y, "NEEDS OPENGL", s == 7, C_MID);
-    else Choice(y, n[c], s == 7, c ? C_GREEN : C_MID); }
+  if (!snesrecomp_shader_supported()) Choice(y, "NEEDS OPENGL", s == 7, C_MID);
+  else { Choice(y, CrtOn() ? "ON  >>" : "OFF  >>", s == 7, CrtOn() ? C_GREEN : C_MID); }
   y += st;
   Row(8, y, "BACK", C_LIGHT);
   static const char *const help[9] = {
     "WINDOWED OR FULLSCREEN", "WINDOW SIZE (WINDOWED ONLY)", "BILINEAR SCALING (SOFTER)",
-    "SYNC TO THE DISPLAY", "BLEND FRAMES (FLICKER)", "REMOVES SPRITE FLICKER", "SHOW FRAMES PER SECOND", "CRT SCREEN LOOK (OPENGL)", ""
+    "SYNC TO THE DISPLAY", "BLEND FRAMES (FLICKER)", "REMOVES SPRITE FLICKER", "SHOW FRAMES PER SECOND", "ENTER FOR CRT OPTIONS", ""
+  };
+  Footer(help[s]);
+}
+
+static void DrawCrt(void) {
+  TextC(14, "CRT FILTER", C_GOLD);
+  char b[24];
+  int y = 34, st = 15, s = M.sel[SCR_CRT];
+  int ok = snesrecomp_shader_supported(), on = CrtOn();
+  Row(0, y, "CRT FILTER", C_LIGHT);
+  if (!ok) Choice(y, "NEEDS OPENGL", s == 0, C_MID);
+  else Choice(y, on ? "ON" : "OFF", s == 0, on ? C_GREEN : C_MID);
+  y += st;
+  static const char *const lab[5] = { "SCANLINES", "BLUR", "GLOW", "PHOSPHOR MASK", "BRIGHTNESS" };
+  const int val[5] = { g_crt_scan, g_crt_blur, g_crt_glow, g_crt_mask, g_crt_bright };
+  for (int i = 0; i < 5; i++) {
+    Row(i + 1, y, lab[i], C_LIGHT);
+    snprintf(b, sizeof b, val[i] == 0 ? "OFF" : "%d%%", val[i]);
+    Choice(y, b, s == i + 1, on ? C_BLUE : C_MID);
+    y += st;
+  }
+  Row(6, y, "RESET TO DEFAULTS", C_LIGHT); y += st;
+  Row(7, y, "BACK", C_LIGHT);
+  static const char *const help[8] = {
+    "TURN THE FILTER ON OR OFF", "DARK GAPS BETWEEN LINES", "HORIZONTAL SOFTNESS",
+    "HALO AROUND BRIGHT AREAS", "RGB STRIPE PATTERN",
+    "OVERALL BRIGHTNESS", "BACK TO THE SOFT DEFAULT LOOK", ""
   };
   Footer(help[s]);
 }
@@ -798,6 +853,7 @@ const uint32_t *GunMenu_Panel(int *w, int *h) {
   case SCR_MAIN: DrawMain(); break;
   case SCR_VIDEO: DrawVideo(); break;
   case SCR_WIDE: DrawWide(); break;
+  case SCR_CRT: DrawCrt(); break;
   case SCR_CONTROLS: DrawControls(); break;
   case SCR_KEYS: DrawBinds(1); break;
   case SCR_PADS: DrawBinds(0); break;

@@ -25,6 +25,10 @@ void snesrecomp_opengl_set_viewport(void (*compute)(int, int, int, int,
 /* Capture the next fully composited OpenGL frame to screenshots/*.bmp. */
 void OpenGLRenderer_RequestScreenshot(void);
 
+/* Override a "#pragma parameter" of the loaded GLSL preset at runtime (persists
+ * across shader reloads). */
+void OpenGLRenderer_SetShaderParam(const char *id, float value);
+
 #ifdef __cplusplus
 }
 #endif
