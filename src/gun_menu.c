@@ -337,7 +337,7 @@ static struct {
 static int RowCount(void) {
   switch (M.scr) {
   case SCR_MAIN: return 10;
-  case SCR_VIDEO: return 8;
+  case SCR_VIDEO: return 9;
   case SCR_WIDE: return 5;
   case SCR_CONTROLS: return 3;
   default: return NB + 2;   /* buttons, reset, back */
@@ -369,6 +369,24 @@ static int Clampi(int v, int lo, int hi) { return v < lo ? lo : v > hi ? hi : v;
 
 static const char *const kVsyncName[3] = { "OFF", "ON", "ADAPTIVE" };
 
+/* CRT filter: OFF / FAST / ACCURATE are the two bundled presets; anything else
+ * that the launcher or config.ini selected shows as CUSTOM. */
+static const char kCrtFast[] = "assets/shaders/crt-fast.glslp";
+static const char kCrtAccurate[] = "assets/shaders/crt-accurate.glslp";
+static int CrtMode(void) {
+  const char *p = snesrecomp_get_shader();
+  if (!p || !p[0]) return 0;
+  if (strstr(p, "crt-fast")) return 1;
+  if (strstr(p, "crt-accurate")) return 2;
+  return 3;
+}
+static void CrtCycle(int d) {
+  if (!snesrecomp_shader_supported()) return;
+  int c = CrtMode();
+  c = (c == 3) ? 0 : (c + (d < 0 ? 2 : 1)) % 3;
+  snesrecomp_set_shader(c == 1 ? kCrtFast : c == 2 ? kCrtAccurate : "");
+}
+
 static void Adjust(int d) {
   int r = M.sel[M.scr];
   M.quit_armed = 0;
@@ -389,6 +407,7 @@ static void Adjust(int d) {
     case 4: snesrecomp_set_frame_blend(!snesrecomp_get_frame_blend()); break;
     case 5: snesrecomp_set_no_sprite_limits(!snesrecomp_get_no_sprite_limits()); break;
     case 6: g_fps = !g_fps; snes_osd_set_fps_visible(g_fps); AspectSave(); break;
+    case 7: CrtCycle(d); break;
     default: break;
     }
     break;
@@ -433,7 +452,7 @@ static void Activate(void) {
     }
     break;
   case SCR_VIDEO:
-    if (r == 7) Back(); else Adjust(1);
+    if (r == 8) Back(); else Adjust(1);
     break;
   case SCR_WIDE:
     if (r == 4) Back(); else Adjust(1);
@@ -671,7 +690,7 @@ static void DrawMain(void) {
 static void DrawVideo(void) {
   TextC(14, "VIDEO", C_GOLD);
   char b[48];
-  int y = 36, st = 15, s = M.sel[SCR_VIDEO];
+  int y = 34, st = 14, s = M.sel[SCR_VIDEO];
   Row(0, y, "DISPLAY", C_LIGHT);
   Choice(y, snesrecomp_get_fullscreen() ? "FULLSCREEN" : "WINDOWED", s == 0, C_BLUE); y += st;
   int sc = snesrecomp_get_window_scale();
@@ -688,10 +707,16 @@ static void DrawVideo(void) {
   Choice(y, snesrecomp_get_no_sprite_limits() ? "REMOVED" : "ORIGINAL", s == 5, C_BLUE); y += st;
   Row(6, y, "FPS COUNTER", C_LIGHT);
   Toggle(y, g_fps, s == 6); y += st;
-  Row(7, y, "BACK", C_LIGHT);
-  static const char *const help[8] = {
+  Row(7, y, "CRT FILTER", C_LIGHT);
+  { static const char *const n[4] = { "OFF", "FAST", "ACCURATE", "CUSTOM" };
+    int c = CrtMode();
+    if (!snesrecomp_shader_supported()) Choice(y, "NEEDS OPENGL", s == 7, C_MID);
+    else Choice(y, n[c], s == 7, c ? C_GREEN : C_MID); }
+  y += st;
+  Row(8, y, "BACK", C_LIGHT);
+  static const char *const help[9] = {
     "WINDOWED OR FULLSCREEN", "WINDOW SIZE (WINDOWED ONLY)", "BILINEAR SCALING (SOFTER)",
-    "SYNC TO THE DISPLAY", "BLEND FRAMES (FLICKER)", "REMOVES SPRITE FLICKER", "SHOW FRAMES PER SECOND", ""
+    "SYNC TO THE DISPLAY", "BLEND FRAMES (FLICKER)", "REMOVES SPRITE FLICKER", "SHOW FRAMES PER SECOND", "CRT SCREEN LOOK (OPENGL)", ""
   };
   Footer(help[s]);
 }

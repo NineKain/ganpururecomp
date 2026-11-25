@@ -542,6 +542,28 @@ int snesrecomp_get_frame_blend(void)
     return g_config.frame_blend;
 }
 
+/* GLSL preset (a path like "assets/shaders/crt-fast.glslp"; "" = none). The
+ * OpenGL presenter reloads it on the next frame. Only the OpenGL presenter
+ * runs shaders, so callers should check snesrecomp_shader_supported(). */
+static char g_runtime_shader[512];
+
+void snesrecomp_set_shader(const char *path)
+{
+    snprintf(g_runtime_shader, sizeof g_runtime_shader, "%s", path ? path : "");
+    g_config.shader = g_runtime_shader[0] ? g_runtime_shader : NULL;
+    g_config_dirty = true; /* forces config write */
+}
+
+const char *snesrecomp_get_shader(void)
+{
+    return g_config.shader ? g_config.shader : "";
+}
+
+int snesrecomp_shader_supported(void)
+{
+    return g_config.output_method == kOutputMethod_OpenGL;
+}
+
 void snesrecomp_set_run_ahead(int frames)
 {
     if (frames < 0) frames = 0;

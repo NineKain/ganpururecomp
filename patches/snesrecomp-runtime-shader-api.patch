@@ -1,0 +1,52 @@
+diff --git a/snesrecomp/runner/src/desktop/host_api.h b/snesrecomp/runner/src/desktop/host_api.h
+index 263d879..5ccaa78 100644
+--- a/snesrecomp/runner/src/desktop/host_api.h
++++ b/snesrecomp/runner/src/desktop/host_api.h
+@@ -79,6 +79,14 @@ void snesrecomp_set_frame_blend(int enabled);
+ /* The frame blending currently in effect: 0 = off, 1 = on. */
+ int snesrecomp_get_frame_blend(void);
+ 
++/* GLSL shader preset, e.g. "assets/shaders/crt-fast.glslp"; "" turns it off.
++ * Applied on the next presented frame. Persisted in config.ini. Shaders only
++ * run on the OpenGL presenter: snesrecomp_shader_supported() says whether the
++ * current presenter is one. */
++void snesrecomp_set_shader(const char *path);
++const char *snesrecomp_get_shader(void);
++int snesrecomp_shader_supported(void);
++
+ /* Frames of local input-latency hiding.  frames: 0 = off.  Negative values
+  * are clamped to 0. */
+ void snesrecomp_set_run_ahead(int frames);
+diff --git a/snesrecomp/runner/src/desktop/host_main.c b/snesrecomp/runner/src/desktop/host_main.c
+index aeccf35..518a128 100644
+--- a/snesrecomp/runner/src/desktop/host_main.c
++++ b/snesrecomp/runner/src/desktop/host_main.c
+@@ -542,6 +542,28 @@ int snesrecomp_get_frame_blend(void)
+     return g_config.frame_blend;
+ }
+ 
++/* GLSL preset (a path like "assets/shaders/crt-fast.glslp"; "" = none). The
++ * OpenGL presenter reloads it on the next frame. Only the OpenGL presenter
++ * runs shaders, so callers should check snesrecomp_shader_supported(). */
++static char g_runtime_shader[512];
++
++void snesrecomp_set_shader(const char *path)
++{
++    snprintf(g_runtime_shader, sizeof g_runtime_shader, "%s", path ? path : "");
++    g_config.shader = g_runtime_shader[0] ? g_runtime_shader : NULL;
++    g_config_dirty = true; /* forces config write */
++}
++
++const char *snesrecomp_get_shader(void)
++{
++    return g_config.shader ? g_config.shader : "";
++}
++
++int snesrecomp_shader_supported(void)
++{
++    return g_config.output_method == kOutputMethod_OpenGL;
++}
++
+ void snesrecomp_set_run_ahead(int frames)
+ {
+     if (frames < 0) frames = 0;

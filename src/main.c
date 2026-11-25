@@ -454,6 +454,7 @@ static const SnesDesktopHostGame kGameHost = {
     .num_players         = 1,
     .widescreen_supported = 1,
     .native_widescreen   = 1,
+    .shader_supported    = 1,
     .prepare_frame       = GunPrepareFrame,
     .window_base_width   = GunWindowBaseWidth,
     .window_base_height  = GunWindowBaseHeight,

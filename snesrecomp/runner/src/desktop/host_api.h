@@ -79,6 +79,14 @@ void snesrecomp_set_frame_blend(int enabled);
 /* The frame blending currently in effect: 0 = off, 1 = on. */
 int snesrecomp_get_frame_blend(void);
 
+/* GLSL shader preset, e.g. "assets/shaders/crt-fast.glslp"; "" turns it off.
+ * Applied on the next presented frame. Persisted in config.ini. Shaders only
+ * run on the OpenGL presenter: snesrecomp_shader_supported() says whether the
+ * current presenter is one. */
+void snesrecomp_set_shader(const char *path);
+const char *snesrecomp_get_shader(void);
+int snesrecomp_shader_supported(void);
+
 /* Frames of local input-latency hiding.  frames: 0 = off.  Negative values
  * are clamped to 0. */
 void snesrecomp_set_run_ahead(int frames);

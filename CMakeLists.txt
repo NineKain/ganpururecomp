@@ -59,6 +59,13 @@ add_custom_command(TARGET GunmansProofSNESRecomp POST_BUILD
             ${CMAKE_SOURCE_DIR}/launcher_assets/icon/gunmans_proof.png
             $<TARGET_FILE_DIR:GunmansProofSNESRecomp>/assets/img/icon.png)
 
+# CRT shader presets (original work), staged beside the exe where the OpenGL
+# presenter and the launcher's shader list look for them (assets/shaders).
+add_custom_command(TARGET GunmansProofSNESRecomp POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/launcher_assets/shaders
+            $<TARGET_FILE_DIR:GunmansProofSNESRecomp>/assets/shaders)
+
 # ROM identity. rom_identity.txt is the one place the digests live: the build
 # turns it into snesrecomp_rom_identity.h (SNESRECOMP_ROM_EXPECTED_SHA256 and
 # friends) for src/main.c, and tools/regen.sh, scripts/package_release.sh and

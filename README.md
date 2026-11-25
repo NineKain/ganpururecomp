@@ -63,6 +63,7 @@ hotkeys can be edited in `config.ini`.
 | WIDESCREEN | Aspect ratio, side edges (EXTEND / BLACK), wide actors, HUD in corners |
 | VOLUME | Master volume |
 | CONTROLS | Keyboard and controller remapping |
+| CRT FILTER (Video page) | OFF / FAST / ACCURATE screen look (OpenGL renderer; best at 3x window size or larger) |
 | SKIP INTRO | Start skips the opening story (on by default) |
 | TEXT SPEED | NORMAL / X2 / X3 / INSTANT |
 | ROOM FADES | NORMAL / FAST / FASTER |

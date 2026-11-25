@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- New CRT FILTER (Insert menu, VIDEO page; also in the launcher's Shader list): FAST (one pass: scanlines, light blur, faint glow, phosphor mask) and ACCURATE (four passes: linear-light beam softening, brightness-dependent scanline beam, halation glow, aperture-grille mask, display gamma). Original shaders in assets/shaders. Needs the OpenGL renderer; scanlines and the mask fade out on small windows and look best at 3x or larger.
 - Removed the MIRROR side-edge mode (it mirrored the HUD text into the margin). A saved MIRROR setting falls back to EXTEND.
 - Launcher: the ROM panel no longer clips text (wrapped notice, shorter built-in browse button, Import/Clear on their own row).
 - Game pauses automatically when the window loses focus and resumes when it returns (a manual pause stays paused; off during netplay).
