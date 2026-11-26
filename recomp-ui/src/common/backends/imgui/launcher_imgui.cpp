@@ -1817,7 +1817,21 @@ void kv_row(const char* k, const char* v, const LauncherTheme& th,
     ImGui::TextUnformatted(ui_text(k));
     ImGui::PopStyleColor();
     ImGui::TableNextColumn();
-    ImGui::TextUnformatted(v);
+    {   /* A value wider than its column (a long ROM file name) is elided with
+         * "..." instead of being cut off mid-letter at the panel edge. */
+        char shown[320];
+        const float avail = ImGui::GetContentRegionAvail().x;
+        snprintf(shown, sizeof shown, "%s", v);
+        if (avail > 0 && ImGui::CalcTextSize(shown).x > avail) {
+            const size_t n = strlen(v);
+            for (size_t start = 1; start < n; ++start) {      /* keep the tail (extension) */
+                char tmp[324];
+                snprintf(tmp, sizeof tmp, "...%s", v + start);
+                if (ImGui::CalcTextSize(tmp).x <= avail) { snprintf(shown, sizeof shown, "%s", tmp); break; }
+            }
+        }
+        ImGui::TextUnformatted(shown);
+    }
     ImGui::TableNextColumn();
     if (show_mark) state_mark(ok, th);
 }

@@ -19,6 +19,7 @@ widescreen, 60 fps, gamepad support and a pixel-art in-game settings menu.
 - **Room fades**: normal, fast (default) or faster.
 - **Skip intro**: press Start during the opening story.
 - Save states, rewind, fast-forward.
+- Pauses automatically when the window loses focus.
 - DualSense, Xbox and other gamepads (SDL3) and remappable controls.
 - **CRT filter** (OpenGL renderer): scanlines, optional blur and glow, and a
   phosphor mask, each adjustable in a submenu (Video > CRT FILTER).

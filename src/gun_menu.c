@@ -672,7 +672,7 @@ static void Row(int i, int y, const char *label, uint32_t lc) {
 }
 
 static void Choice(int y, const char *v, int sel, uint32_t c) {
-  char b[40];
+  char b[64];
   snprintf(b, sizeof b, sel ? "< %s >" : "%s", v);
   TextR(240, y, b, c);
 }
@@ -739,7 +739,7 @@ static void DrawVideo(void) {
   Toggle(y, g_fps, s == 6); y += st;
   Row(7, y, "CRT FILTER", C_LIGHT);
   if (!snesrecomp_shader_supported()) Choice(y, "NEEDS OPENGL", s == 7, C_MID);
-  else { Choice(y, CrtOn() ? "ON  >>" : "OFF  >>", s == 7, CrtOn() ? C_GREEN : C_MID); }
+  else { Choice(y, CrtOn() ? "ON" : "OFF", s == 7, CrtOn() ? C_GREEN : C_MID); }
   y += st;
   Row(8, y, "BACK", C_LIGHT);
   static const char *const help[9] = {

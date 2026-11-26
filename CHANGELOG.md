@@ -1,13 +1,14 @@
 # Changelog
 
-## Unreleased
+## 0.4.0 (2026-11-26)
 
 - New CRT FILTER (Insert menu > VIDEO > CRT FILTER, Enter opens a submenu): scanlines, blur, glow, phosphor mask and brightness are each adjustable and saved; RESET TO DEFAULTS restores the soft default (sharp pixels, light scanlines, no blur, a trace of glow). One original shader (assets/shaders/crt.glslp), also listed in the launcher's Shader dropdown. Needs the OpenGL renderer; scanlines and the mask fade out on small windows and look best at 3x or larger.
 - Removed controller rumble (PAD FEEDBACK) completely.
 - Removed the MIRROR side-edge mode (it mirrored the HUD text into the margin). A saved MIRROR setting falls back to EXTEND.
 - Launcher: the ROM panel no longer clips text (wrapped notice, shorter built-in browse button, Import/Clear on their own row).
 - Game pauses automatically when the window loses focus and resumes when it returns (a manual pause stays paused; off during netplay).
-- Settings menu text no longer clips.
+- Settings menu text no longer clips (main, widescreen, video, controls and binding pages re-laid out).
+- Launcher: a long ROM file name in the ROM panel is shortened with "..." instead of being cut off.
 
 ## 0.3.0
 

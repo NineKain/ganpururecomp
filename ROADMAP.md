@@ -1,5 +1,9 @@
 # Roadmap
 
+## 0.4.0: released
+
+- CRT filter with a tweak submenu, pause on focus loss, launcher and menu text fixes; MIRROR edge mode and controller rumble removed (see CHANGELOG).
+
 ## 0.3.0: Linux release
 
 - Ship a Linux x86-64 tar.gz (done for 0.3.0; see CHANGELOG).
@@ -18,7 +22,6 @@ Verification gaps from 0.1.0 (fix or confirm first):
 
 QoL ideas (not started):
 - Auto-resume (framework `Autosave` option exposed in the menu).
-- Pause on focus loss.
 - Screenshot hotkey, quick save / quick load keys.
 - Skip any cutscene with Start (the way skip-intro works).
 - Hold a button to rush dialogue.
