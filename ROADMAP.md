@@ -1,5 +1,9 @@
 # Roadmap
 
+## 1.0.0: released
+
+- Stable release; rooms wider than 512 px verified (see CHANGELOG).
+
 ## 0.4.0: released
 
 - CRT filter with a tweak submenu, pause on focus loss, launcher and menu text fixes; MIRROR edge mode and controller rumble removed (see CHANGELOG).

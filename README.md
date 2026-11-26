@@ -70,7 +70,7 @@ hotkeys can be edited in `config.ini`.
 | ROOM FADES | NORMAL / FAST / FASTER |
 
 Known limits: projectile and effect sprites can still pop at the original
-screen edge, rooms wider than 512 px are untested, and audio speeds up during
+screen edge, and audio speeds up during
 the fast-forwarded room fades.
 
 ## Build from source

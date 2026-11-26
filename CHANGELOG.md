@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0 (2026-11-26)
+
+- First stable release. Feature set unchanged from 0.4.0: true widescreen, 60 fps, gamepad, pixel-art settings menu, CRT filter, Linux and Windows builds.
+- Checked rooms wider than 512 px (the sandy lake room scrolls 768 px): at 21:9 and 16:9 the extended margins show real world content while walking in all four directions, with no stale or wrapped tiles, and the HUD stays put.
+
 ## 0.4.0 (2026-11-26)
 
 - New CRT FILTER (Insert menu > VIDEO > CRT FILTER, Enter opens a submenu): scanlines, blur, glow, phosphor mask and brightness are each adjustable and saved; RESET TO DEFAULTS restores the soft default (sharp pixels, light scanlines, no blur, a trace of glow). One original shader (assets/shaders/crt.glslp), also listed in the launcher's Shader dropdown. Needs the OpenGL renderer; scanlines and the mask fade out on small windows and look best at 3x or larger.
